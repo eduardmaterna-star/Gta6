@@ -1,0 +1,27 @@
+name: Offline installer build validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Launcher/GTA6.Installer/**"
+      - "Scripts/Build-OfflineInstaller.ps1"
+      - ".github/workflows/offline-installer-build.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Launcher/GTA6.Installer/**"
+      - "Scripts/Build-OfflineInstaller.ps1"
+      - ".github/workflows/offline-installer-build.yml"
+  workflow_dispatch:
+
+jobs:
+  compile-installer-source:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Build installer source without game payload
+        run: dotnet build Launcher/GTA6.Installer/GTA6.Installer.csproj --configuration Release
