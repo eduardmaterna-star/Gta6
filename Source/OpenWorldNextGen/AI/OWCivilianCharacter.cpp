@@ -20,6 +20,11 @@ AOWCivilianCharacter::AOWCivilianCharacter()
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->RotationRate = FRotator(0.0f, 360.0f, 0.0f);
     GetCharacterMovement()->MaxAcceleration = 600.0f;
+    // Enable Unreal's built-in RVO steering as a first layer of local NPC avoidance.
+    // This is not a replacement for a full crowd manager or traffic simulation.
+    GetCharacterMovement()->bUseRVOAvoidance = true;
+    GetCharacterMovement()->AvoidanceConsiderationRadius = 400.0f;
+    GetCharacterMovement()->AvoidanceWeight = 0.5f;
 
     // Temporary proxy makes placed test civilians visible before character art exists.
     PlaceholderBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaceholderBody"));
