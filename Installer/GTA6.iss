@@ -26,8 +26,8 @@ SetupLogging=yes
 Uninstallable=yes
 CloseApplications=yes
 RestartApplications=no
-VersionInfoVersion={#AppVersion}
-VersionInfoProductVersion={#AppVersion}
+VersionInfoVersion={#AppVersion}.0
+VersionInfoProductVersion={#AppVersion}.0
 VersionInfoDescription=GTA6 Offline Installer
 VersionInfoProductName=GTA6
 
