@@ -38,6 +38,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Civilian|Movement", meta = (ClampMin = "1.0", ClampMax = "60.0"))
     float WanderInterval = 8.0f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Civilian|Movement", meta = (ClampMin = "100.0", ClampMax = "5000.0"))
+    float MinimumWanderDistance = 500.0f;
+
     UPROPERTY(EditDefaultsOnly, Category = "Civilian|Movement", meta = (ClampMin = "10.0", ClampMax = "300.0"))
     float AcceptanceRadius = 80.0f;
 
