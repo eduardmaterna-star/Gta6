@@ -12,27 +12,29 @@ Samostatná originální open-world akční hra inspirovaná kriminálním žán
 - Nejprve singleplayer; multiplayer se posoudí v pozdější fázi.
 - Výkonový cíl 1080p / 120 FPS je požadavek k ověření, ne naměřený výsledek.
 
-Podrobnosti: `Docs/GAME_DESIGN_DECISIONS.md`.
+## Distribuce pro Windows
+Projekt obsahuje prototyp kombinovaného instalátoru:
+- malá aplikace Windows pro online i offline instalaci,
+- online zdroj přes HTTPS manifest a ZIP balík,
+- offline zdroj z lokální složky se stejným manifestem a ZIP balíkem,
+- kontrola SHA-256, bezpečné rozbalení a instalace přes staging adresář.
 
-## Aktuální stav zdrojů
+Dokumentace: `Docs/DISTRIBUTION_ARCHITECTURE.md` a `Launcher/README.md`.
+
+Cíl přibližně 50 MB se týká pouze instalátoru, nikoli celé hry. Aktuální prototyp je framework-dependent .NET 8 WinForms aplikace a na cílovém počítači proto vyžaduje .NET 8 Desktop Runtime. Skutečnou velikost EXE zatím nelze uvést, protože nebyl proveden Windows publish. Online server, herní balík a podepsané vydání zatím nejsou připravené.
+
+## Aktuální stav hry
 **Milestone 002 — první runtime greybox čtvrť.** Obsahuje C++ third-person prototyp a procedurálně poskládanou blokovou čtvrť. Nejde zatím o detailní Prahu ani o finální mapu.
 
-**Milestone 004 — projektová základna a vertikální řez.** Připraveny jsou projektové konfigurační soubory, kontrola konzistence v CI a dokumentace pro lokální Windows build. Samotná kompilace UE a tvorba editorového `.umap` vyžadují Unreal Editor na Windows.
+**Milestone 004 — projektová základna.** Připraveny jsou projektové konfigurační soubory, statické CI kontroly a dokumentace pro lokální Windows build. Skutečný World Partition `.umap` musí být vytvořen v Unreal Editoru.
 
-## Požadavky pro lokální build
-- Unreal Engine **5.8.x** (doporučeno nainstalovat nejnovější dostupný 5.8 hotfix).
-- Visual Studio 2022 nebo kompatibilní novější toolchain s C++ desktop/game development komponentami a Windows SDK.
-- Python 3 pro lokální statickou kontrolu (není nutný pro samotnou kompilaci).
+## Požadavky pro lokální build hry
+- Unreal Engine 5.8.x.
+- Visual Studio 2022 s C++ workloady a Windows SDK.
 
-Otevři `OPEN_WORLD_Next_Gen.uproject` v Unreal Editoru, nech vygenerovat IDE soubory a sestav konfiguraci Development Editor. Přesný postup je v `Docs/WINDOWS_BUILD_AND_TEST.md`.
-
-## Ovládání prototypu
-- `W A S D` — pohyb
-- myš — kamera
-- `Space` — skok
-- `E` — interakce s podporovaným objektem
+Podrobnosti: `Docs/WINDOWS_BUILD_AND_TEST.md`.
 
 ## Ověření
-GitHub Actions kontroluje JSON projektu, přítomnost základních C++ modulů a konzistenci konfiguračních cest. Tato kontrola **nenahrazuje** kompilaci Unreal Engine.
+GitHub Actions provádí statické kontroly metadat projektu a zdrojů instalátoru. Tyto kontroly nenahrazují kompilaci Unreal Engine ani .NET aplikace.
 
-V tomto prostředí nebyl dostupný Unreal Editor ani MSVC. Kompilace, spuštění, herní testy a FPS proto nejsou potvrzené. Současná čtvrť používá engine cube mesh a zůstává greyboxem. Neobsahuje hotové assety, dopravní simulaci, chodce ani finální interiéry.
+V tomto prostředí nebyl dostupný Unreal Editor, MSVC ani Windows .NET SDK. Kompilace, spuštění, herní testy, instalace a velikost výsledného instalátoru proto nejsou potvrzené.
