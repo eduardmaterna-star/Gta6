@@ -62,6 +62,21 @@ def main() -> int:
     require("SpawnActor<APlayerStart>" not in city_map_source,
             "City map must not create PlayerStart during its late BeginPlay.")
 
+    input_config = (ROOT / "Config/DefaultInput.ini").read_text(encoding="utf-8")
+    for mapping in ("MoveForward", "MoveRight", "Turn", "LookUp", "Jump", "Interact"):
+        require(mapping in input_config, f"Missing default input mapping: {mapping}")
+
+    player_source = (ROOT / "Source/OpenWorldNextGen/Player/OWPlayerCharacter.cpp").read_text(encoding="utf-8")
+    interactable_header = ROOT / "Source/OpenWorldNextGen/Player/OWInteractable.h"
+    require(interactable_header.is_file(), "Player interaction interface header is missing.")
+    require("IOWInteractable::Execute_Interact" in player_source,
+            "Player interaction must dispatch through the generated interface wrapper.")
+
+    require("StreetFurniture.Get(), ParkProps.Get()" in city_map_source,
+            "Decorative components must be configured separately from collidable world geometry.")
+    require("Component->SetCollisionEnabled(ECollisionEnabled::NoCollision)" in city_map_source,
+            "Decorative props should not add unnecessary physics collision.")
+
     print("Static project validation passed.")
     print("PlayerStart initialization order checks passed.")
     print("Note: UnrealHeaderTool, MSVC compilation, editor launch and packaged-game tests were not run.")
