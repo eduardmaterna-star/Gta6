@@ -40,6 +40,7 @@ def main() -> int:
         "Source/OpenWorldNextGen/Game/OWGameMode.cpp",
         "Source/OpenWorldNextGen/Player/OWPlayerCharacter.cpp",
         "Source/OpenWorldNextGen/World/OWCityMap.cpp",
+        "Source/OpenWorldNextGen/AI/OWCivilianCharacter.cpp",
     )
     for relative in required_sources:
         require((ROOT / relative).is_file(), f"Missing required source: {relative}")
@@ -74,10 +75,29 @@ def main() -> int:
 
     require("StreetFurniture.Get(), ParkProps.Get()" in city_map_source,
             "Decorative components must be configured separately from collidable world geometry.")
+    civilian_header = (ROOT / "Source/OpenWorldNextGen/AI/OWCivilianCharacter.h").read_text(encoding="utf-8")
+    civilian_source = (ROOT / "Source/OpenWorldNextGen/AI/OWCivilianCharacter.cpp").read_text(encoding="utf-8")
+    require("AOWCivilianCharacter" in civilian_header and "AOWCivilianCharacter::ChooseNextWanderDestination" in civilian_source,
+            "Civilian navigation prototype is missing.")
+    require("AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned" in civilian_source,
+            "Civilian actors must automatically receive an AI controller when placed or spawned.")
+    require("GetRandomReachablePointInRadius" in civilian_source and "MoveToLocation" in civilian_source,
+            "Civilian wandering must use reachable NavMesh destinations.")
+    require("PrimaryActorTick.bCanEverTick = false" in civilian_source,
+            "Civilian prototype should remain timer-driven without an unnecessary per-frame tick.")
+    require("ClearTimer(WanderTimerHandle)" in civilian_source,
+            "Civilian timer must be cleared on EndPlay.")
+
+    require("\"AIModule\"" in (ROOT / "Source/OpenWorldNextGen/OpenWorldNextGen.Build.cs").read_text(encoding="utf-8"),
+            "AIModule dependency is required by the civilian prototype.")
+    require("\"NavigationSystem\"" in (ROOT / "Source/OpenWorldNextGen/OpenWorldNextGen.Build.cs").read_text(encoding="utf-8"),
+            "NavigationSystem dependency is required by the civilian prototype.")
+
     require("Component->SetCollisionEnabled(ECollisionEnabled::NoCollision)" in city_map_source,
             "Decorative props should not add unnecessary physics collision.")
 
     print("Static project validation passed.")
+    print("Civilian NavMesh wandering source checks passed.")
     print("PlayerStart initialization order checks passed.")
     print("Note: UnrealHeaderTool, MSVC compilation, editor launch and packaged-game tests were not run.")
     return 0
