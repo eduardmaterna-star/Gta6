@@ -40,11 +40,20 @@ AOWCityMap::AOWCityMap()
         ParkProps->SetStaticMesh(CubeMesh.Object);
     }
 
-    for (UInstancedStaticMeshComponent* Component : { Ground.Get(), Roads.Get(), Sidewalks.Get(), Buildings.Get(), StreetFurniture.Get(), ParkProps.Get() })
+    // Only world geometry that the player must stand on or collide with participates in physics.
+    for (UInstancedStaticMeshComponent* Component : { Ground.Get(), Roads.Get(), Sidewalks.Get(), Buildings.Get() })
     {
         Component->SetMobility(EComponentMobility::Static);
-        Component->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
         Component->SetCollisionProfileName(TEXT("BlockAll"));
+        Component->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        Component->SetGenerateOverlapEvents(false);
+    }
+
+    // Decorative props are batched visually but do not need per-instance physics collision.
+    for (UInstancedStaticMeshComponent* Component : { StreetFurniture.Get(), ParkProps.Get() })
+    {
+        Component->SetMobility(EComponentMobility::Static);
+        Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Component->SetGenerateOverlapEvents(false);
     }
 }
