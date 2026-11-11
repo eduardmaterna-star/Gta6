@@ -20,21 +20,25 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: "GTA6 Workspace"
       - name: Install Inno Setup
         run: choco install innosetup --yes --no-progress
       - name: Prepare a placeholder game package for compiler validation
         shell: pwsh
+        working-directory: "GTA6 Workspace"
         run: |
           New-Item -ItemType Directory -Force Build/Windows | Out-Null
           Set-Content -LiteralPath Build/Windows/OpenWorldNextGen.exe -Value "CI placeholder only"
           New-Item -ItemType Directory -Force Build/Installer | Out-Null
       - name: Build installer through the production PowerShell script
         shell: pwsh
+        working-directory: "GTA6 Workspace"
         run: ./Scripts/Build-OfflineInstaller.ps1 -Version 0.1.0
       - name: Upload installer smoke-test artifact
         uses: actions/upload-artifact@v4
         with:
           name: offline-installer-smoke-test
-          path: Build/Installer/GTA6-Setup-0.1.0-x64.exe
+          path: "GTA6 Workspace/Build/Installer/GTA6-Setup-0.1.0-x64.exe"
           if-no-files-found: error
           retention-days: 3
