@@ -5,8 +5,6 @@ namespace GTA6.Installer;
 
 internal sealed class PackageInstaller
 {
-    private readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(30) };
-
     public async Task InstallAsync(
         ReleaseManifest manifest,
         string packagePath,
