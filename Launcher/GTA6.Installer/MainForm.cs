@@ -60,21 +60,10 @@ internal sealed class MainForm : Form
                 ?? throw new InvalidDataException("Instalátor neobsahuje offline manifest.");
             var manifest = ReleaseManifest.Load(manifestStream);
 
-            var tempPackage = Path.Combine(Path.GetTempPath(), $"gta6-offline-{Guid.NewGuid():N}.zip");
-            try
-            {
-                await using var embeddedPackage = assembly.GetManifestResourceStream("GTA6.Installer.OfflinePackage.zip")
-                    ?? throw new InvalidDataException("Instalátor neobsahuje herní balík.");
-                await using (var output = new FileStream(tempPackage, FileMode.CreateNew, FileAccess.Write, FileShare.None, 1024 * 1024, useAsync: true))
-                    await embeddedPackage.CopyToAsync(output, cancellation.Token);
+            await using var embeddedPackage = assembly.GetManifestResourceStream("GTA6.Installer.OfflinePackage.zip")
+                ?? throw new InvalidDataException("Instalátor neobsahuje herní balík.");
+            await _installer.InstallAsync(manifest, embeddedPackage, _installPath.Text, progress, cancellation.Token);
 
-                await _installer.InstallAsync(manifest, tempPackage, _installPath.Text, progress, cancellation.Token);
-            }
-            finally
-            {
-                if (File.Exists(tempPackage))
-                    File.Delete(tempPackage);
-            }
 
             _status.Text = $"GTA6 {manifest.Version} bylo nainstalováno.";
             if (MessageBox.Show(this, "Instalace dokončena. Spustit GTA6?", "GTA6",
