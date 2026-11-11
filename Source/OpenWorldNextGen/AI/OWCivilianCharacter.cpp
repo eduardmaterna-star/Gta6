@@ -1,0 +1,96 @@
+#include "OWCivilianCharacter.h"
+
+#include "AIController.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "NavigationSystem.h"
+#include "UObject/ConstructorHelpers.h"
+
+AOWCivilianCharacter::AOWCivilianCharacter()
+{
+    PrimaryActorTick.bCanEverTick = false;
+    AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+    AIControllerClass = AAIController::StaticClass();
+
+    GetCapsuleComponent()->InitCapsuleSize(42.0f, 96.0f);
+    GetCharacterMovement()->MaxWalkSpeed = 220.0f;
+    GetCharacterMovement()->bOrientRotationToMovement = true;
+    GetCharacterMovement()->RotationRate = FRotator(0.0f, 360.0f, 0.0f);
+    GetCharacterMovement()->MaxAcceleration = 600.0f;
+
+    // Temporary proxy makes placed test civilians visible before character art exists.
+    PlaceholderBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaceholderBody"));
+    PlaceholderBody->SetupAttachment(GetCapsuleComponent());
+    PlaceholderBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    PlaceholderBody->SetRelativeLocation(FVector(0.0f, 0.0f, 5.0f));
+    PlaceholderBody->SetRelativeScale3D(FVector(0.55f, 0.55f, 1.6f));
+
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaceholderMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    if (PlaceholderMesh.Succeeded())
+    {
+        PlaceholderBody->SetStaticMesh(PlaceholderMesh.Object);
+    }
+}
+
+void AOWCivilianCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+    ScheduleNextAttempt(FMath::FRandRange(0.5f, 2.0f));
+}
+
+void AOWCivilianCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    GetWorldTimerManager().ClearTimer(WanderTimerHandle);
+
+    if (AAIController* AIController = Cast<AAIController>(GetController()))
+    {
+        AIController->StopMovement();
+    }
+
+    Super::EndPlay(EndPlayReason);
+}
+
+void AOWCivilianCharacter::ScheduleNextAttempt(float DelaySeconds)
+{
+    if (UWorld* World = GetWorld())
+    {
+        World->GetTimerManager().SetTimer(
+            WanderTimerHandle,
+            this,
+            &AOWCivilianCharacter::ChooseNextWanderDestination,
+            FMath::Max(0.1f, DelaySeconds),
+            false);
+    }
+}
+
+void AOWCivilianCharacter::ChooseNextWanderDestination()
+{
+    UWorld* World = GetWorld();
+    AAIController* AIController = Cast<AAIController>(GetController());
+    UNavigationSystemV1* NavigationSystem = World ? UNavigationSystemV1::GetCurrent(World) : nullptr;
+
+    if (!World || !AIController || !NavigationSystem)
+    {
+        // Retry later: AI possession or navigation data may not be ready yet.
+        ScheduleNextAttempt(2.0f);
+        return;
+    }
+
+    FNavLocation Destination;
+    const bool bFoundDestination = NavigationSystem->GetRandomReachablePointInRadius(
+        GetActorLocation(),
+        WanderRadius,
+        Destination);
+
+    if (!bFoundDestination)
+    {
+        // A missing NavMesh should not cause a tight retry loop or a crash.
+        ScheduleNextAttempt(3.0f);
+        return;
+    }
+
+    AIController->MoveToLocation(Destination.Location, AcceptanceRadius);
+    ScheduleNextAttempt(FMath::FRandRange(WanderInterval * 0.75f, WanderInterval * 1.25f));
+}
