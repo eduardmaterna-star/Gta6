@@ -80,36 +80,6 @@ internal sealed class PackageInstaller
         }
     }
 
-    public async Task<string> DownloadPackageAsync(
-        Uri packageUri,
-        string destination,
-        IProgress<string> progress,
-        CancellationToken cancellationToken)
-    {
-        if (packageUri.Scheme != Uri.UriSchemeHttps)
-            throw new InvalidOperationException("Stažení je povoleno pouze přes HTTPS.");
-
-        progress.Report("Stahuji instalační balík…");
-        using var response = await _http.GetAsync(packageUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var temp = destination + ".download";
-        try
-        {
-            await using var input = await response.Content.ReadAsStreamAsync(cancellationToken);
-            await using var output = new FileStream(temp, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true);
-            await input.CopyToAsync(output, cancellationToken);
-            await output.FlushAsync(cancellationToken);
-            File.Move(temp, destination, overwrite: true);
-            return destination;
-        }
-        finally
-        {
-            if (File.Exists(temp))
-                File.Delete(temp);
-        }
-    }
-
     private static void ExtractZipSafely(string archivePath, string destination, CancellationToken token)
     {
         var root = Path.GetFullPath(destination) + Path.DirectorySeparatorChar;
