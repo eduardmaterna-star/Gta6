@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "Launcher/GTA6.Installer/**"
+      - "Launcher/GTA6.Installer.Tests/**"
       - "Scripts/Build-OfflineInstaller.ps1"
       - ".github/workflows/offline-installer-build.yml"
   pull_request:
@@ -25,3 +26,5 @@ jobs:
           dotnet-version: "8.0.x"
       - name: Build installer source without game payload
         run: dotnet build Launcher/GTA6.Installer/GTA6.Installer.csproj --configuration Release
+      - name: Run installer security and payload tests
+        run: dotnet test Launcher/GTA6.Installer.Tests/GTA6.Installer.Tests.csproj --configuration Release --logger "console;verbosity=normal"
