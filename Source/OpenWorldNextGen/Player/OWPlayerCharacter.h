@@ -6,6 +6,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class OPENWORLDNEXTGEN_API AOWPlayerCharacter : public ACharacter
@@ -30,6 +31,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<UCameraComponent> FollowCamera;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+    TObjectPtr<UStaticMeshComponent> PlaceholderBody;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interaction", meta = (ClampMin = "50.0", ClampMax = "1000.0"))
     float InteractionDistance = 300.0f;
