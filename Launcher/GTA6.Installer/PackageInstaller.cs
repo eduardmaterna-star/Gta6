@@ -7,26 +7,24 @@ internal sealed class PackageInstaller
 {
     public async Task InstallAsync(
         ReleaseManifest manifest,
-        string packagePath,
+        Stream packageStream,
         string installDirectory,
         IProgress<string> progress,
         CancellationToken cancellationToken)
     {
         manifest.Validate();
-        if (!File.Exists(packagePath))
-            throw new FileNotFoundException("Instalační balík nebyl nalezen.", packagePath);
+        ArgumentNullException.ThrowIfNull(packageStream);
+        if (!packageStream.CanRead || !packageStream.CanSeek)
+            throw new ArgumentException("Herní balík musí být čitelný a umožňovat posun streamu.", nameof(packageStream));
         if (string.IsNullOrWhiteSpace(installDirectory))
             throw new InvalidOperationException("Instalační cesta není vyplněná.");
 
         progress.Report("Ověřuji integritu instalačního balíku…");
-        await using (var packageStream = new FileStream(
-            packagePath, FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 1024,
-            FileOptions.Asynchronous | FileOptions.SequentialScan))
-        {
-            var actualHash = Convert.ToHexString(await SHA256.HashDataAsync(packageStream, cancellationToken));
-            if (!actualHash.Equals(manifest.Sha256, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException("SHA-256 balíku nesouhlasí. Instalace byla zastavena.");
-        }
+        packageStream.Position = 0;
+        var actualHash = Convert.ToHexString(await SHA256.HashDataAsync(packageStream, cancellationToken));
+        if (!actualHash.Equals(manifest.Sha256, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("SHA-256 balíku nesouhlasí. Instalace byla zastavena.");
+        packageStream.Position = 0;
 
         var fullTarget = Path.GetFullPath(installDirectory);
         var trimmedTarget = Path.TrimEndingDirectorySeparator(fullTarget);
@@ -45,14 +43,14 @@ internal sealed class PackageInstaller
         try
         {
             progress.Report("Kontroluji obsah herního balíku…");
-            var requiredBytes = GetUncompressedSize(packagePath, cancellationToken);
+            var requiredBytes = GetUncompressedSize(packageStream, cancellationToken);
             var drive = new DriveInfo(Path.GetPathRoot(staging)!);
             var safetyMargin = 256L * 1024 * 1024;
             if (requiredBytes > drive.AvailableFreeSpace - safetyMargin)
                 throw new IOException("Na cílovém disku není dostatek volného místa pro instalaci.");
 
             progress.Report("Rozbaluji herní soubory…");
-            ExtractZipSafely(packagePath, staging, cancellationToken);
+            ExtractZipSafely(packageStream, staging, cancellationToken);
 
             var executable = ResolveContainedPath(staging, manifest.Executable);
             if (!File.Exists(executable))
@@ -98,9 +96,10 @@ internal sealed class PackageInstaller
         }
     }
 
-    private static long GetUncompressedSize(string archivePath, CancellationToken token)
+    private static long GetUncompressedSize(Stream packageStream, CancellationToken token)
     {
-        using var archive = ZipFile.OpenRead(archivePath);
+        packageStream.Position = 0;
+        using var archive = new ZipArchive(packageStream, ZipArchiveMode.Read, leaveOpen: true);
         long total = 0;
         foreach (var entry in archive.Entries)
         {
@@ -116,11 +115,12 @@ internal sealed class PackageInstaller
         return total;
     }
 
-    private static void ExtractZipSafely(string archivePath, string destination, CancellationToken token)
+    private static void ExtractZipSafely(Stream packageStream, string destination, CancellationToken token)
     {
+        packageStream.Position = 0;
         var root = Path.GetFullPath(destination);
         var rootWithSeparator = Path.TrimEndingDirectorySeparator(root) + Path.DirectorySeparatorChar;
-        using var archive = ZipFile.OpenRead(archivePath);
+        using var archive = new ZipArchive(packageStream, ZipArchiveMode.Read, leaveOpen: true);
         var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var entry in archive.Entries)
