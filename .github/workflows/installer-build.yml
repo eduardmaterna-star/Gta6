@@ -1,0 +1,44 @@
+name: Build GTA6 online installer
+
+on:
+  push:
+    paths:
+      - "Installer/**"
+      - ".github/workflows/installer-build.yml"
+  pull_request:
+    paths:
+      - "Installer/**"
+      - ".github/workflows/installer-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Restore
+        run: dotnet restore Installer/GTA6Installer.csproj
+      - name: Build
+        run: dotnet build Installer/GTA6Installer.csproj -c Release --no-restore
+      - name: Publish
+        run: dotnet publish Installer/GTA6Installer.csproj -c Release -r win-x64 --self-contained false -o artifacts/GTA6Installer
+      - name: Measure installer
+        shell: pwsh
+        run: |
+          $file = Get-Item artifacts/GTA6Installer/GTA6Installer.exe
+          $sizeMb = [math]::Round($file.Length / 1MB, 2)
+          "Installer size: $sizeMb MB" | Tee-Object -FilePath artifacts/installer-size.txt
+          if ($file.Length -gt 50MB) { Write-Warning "Installer exceeds the approximate 50 MB target." }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GTA6-Online-Installer-win-x64
+          path: |
+            artifacts/GTA6Installer/**
+            artifacts/installer-size.txt
+          if-no-files-found: error
