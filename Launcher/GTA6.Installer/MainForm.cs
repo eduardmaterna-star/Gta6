@@ -6,7 +6,7 @@ namespace GTA6.Installer;
 internal sealed class MainForm : Form
 {
     private readonly TextBox _installPath = new() { Text = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "GTA6"), Width = 390 };
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "GTA6"), Width = 390 };
     private readonly TextBox _sourcePath = new() { Width = 390, ReadOnly = true };
     private readonly Label _status = new() { AutoSize = true, Text = "Připraveno." };
     private readonly Button _installButton = new() { Text = "Instalovat GTA6", AutoSize = true };
