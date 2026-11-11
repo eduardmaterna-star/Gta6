@@ -27,12 +27,13 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force Build/Windows | Out-Null
           Set-Content -LiteralPath Build/Windows/OpenWorldNextGen.exe -Value "CI placeholder only"
+          New-Item -ItemType Directory -Force Build/Installer | Out-Null
       - name: Compile the complete offline installer script
         shell: pwsh
         run: |
           $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { throw "ISCC.exe was not installed." }
-          & $iscc "/DAppVersion=0.1.0" "/DGameDir=$((Resolve-Path Build/Windows).Path)" Installer/GTA6.iss
+          & $iscc "/DAppVersion=0.1.0" "/DGameDir=$((Resolve-Path Build/Windows).Path)" "/DOutputDir=$((Resolve-Path Build/Installer).Path)" Installer/GTA6.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed." }
           $installer = "Build/Installer/GTA6-Setup-0.1.0-x64.exe"
           if (-not (Test-Path $installer)) { throw "Installer output was not created." }
