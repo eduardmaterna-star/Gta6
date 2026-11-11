@@ -31,7 +31,7 @@ No packaged Unreal Windows build exists yet. Therefore the final installer canno
 
 ## Installer safety checks
 
-The installer source also performs the following checks before committing an installation:
+The installer reads the embedded ZIP directly as a seekable assembly resource stream; it does not create an additional temporary copy of the full archive. It hashes and rewinds the stream before inspecting and extracting the ZIP. The installer source also performs the following checks before committing an installation:
 
 - Verifies the package SHA-256 before extraction.
 - Calculates the ZIP's declared uncompressed size and checks available space on the target drive, leaving a 256 MiB safety margin.
