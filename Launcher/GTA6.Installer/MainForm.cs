@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Reflection;
 
 namespace GTA6.Installer;
 
@@ -55,14 +54,9 @@ internal sealed class MainForm : Form
 
         try
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            await using var manifestStream = assembly.GetManifestResourceStream("GTA6.Installer.offline-manifest.json")
-                ?? throw new InvalidDataException("Instalátor neobsahuje offline manifest.");
-            var manifest = ReleaseManifest.Load(manifestStream);
-
-            await using var embeddedPackage = assembly.GetManifestResourceStream("GTA6.Installer.OfflinePackage.zip")
-                ?? throw new InvalidDataException("Instalátor neobsahuje herní balík.");
-            await _installer.InstallAsync(manifest, embeddedPackage, _installPath.Text, progress, cancellation.Token);
+            using var payload = OfflinePayload.Open(Application.ExecutablePath);
+            var manifest = payload.Manifest;
+            await _installer.InstallAsync(manifest, payload.PackageStream, _installPath.Text, progress, cancellation.Token);
 
 
             _status.Text = $"GTA6 {manifest.Version} bylo nainstalováno.";
