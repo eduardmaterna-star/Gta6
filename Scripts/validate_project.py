@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +36,7 @@ def main() -> int:
 
     required_sources = (
         "Source/OpenWorldNextGen/OpenWorldNextGen.cpp",
+        "Source/OpenWorldNextGen/Game/OWGameMode.h",
         "Source/OpenWorldNextGen/Game/OWGameMode.cpp",
         "Source/OpenWorldNextGen/Player/OWPlayerCharacter.cpp",
         "Source/OpenWorldNextGen/World/OWCityMap.cpp",
@@ -44,7 +44,26 @@ def main() -> int:
     for relative in required_sources:
         require((ROOT / relative).is_file(), f"Missing required source: {relative}")
 
+    game_mode_header = (ROOT / "Source/OpenWorldNextGen/Game/OWGameMode.h").read_text(encoding="utf-8")
+    game_mode_source = (ROOT / "Source/OpenWorldNextGen/Game/OWGameMode.cpp").read_text(encoding="utf-8")
+    city_map_source = (ROOT / "Source/OpenWorldNextGen/World/OWCityMap.cpp").read_text(encoding="utf-8")
+
+    require("virtual void InitGame(" in game_mode_header,
+            "GameMode must declare InitGame so the fallback PlayerStart exists before player spawning.")
+    init_game_index = game_mode_source.find("void AOWGameMode::InitGame(")
+    begin_play_index = game_mode_source.find("void AOWGameMode::BeginPlay(")
+    player_start_index = game_mode_source.find("SpawnActor<APlayerStart>")
+    require(init_game_index >= 0 and begin_play_index > init_game_index,
+            "GameMode InitGame must be implemented before BeginPlay.")
+    require(init_game_index < player_start_index < begin_play_index,
+            "Fallback PlayerStart must be spawned during InitGame, not after BeginPlay.")
+    require("TActorIterator<APlayerStart>" in game_mode_source,
+            "GameMode must reuse a level-authored PlayerStart instead of creating a duplicate.")
+    require("SpawnActor<APlayerStart>" not in city_map_source,
+            "City map must not create PlayerStart during its late BeginPlay.")
+
     print("Static project validation passed.")
+    print("PlayerStart initialization order checks passed.")
     print("Note: UnrealHeaderTool, MSVC compilation, editor launch and packaged-game tests were not run.")
     return 0
 
