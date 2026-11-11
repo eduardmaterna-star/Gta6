@@ -4,27 +4,36 @@ on:
   push:
     branches: [main]
     paths:
-      - "Launcher/GTA6.Installer/**"
-      - "Launcher/GTA6.Installer.Tests/**"
+      - "Installer/**"
       - "Scripts/Build-OfflineInstaller.ps1"
       - ".github/workflows/offline-installer-build.yml"
   pull_request:
     branches: [main]
     paths:
-      - "Launcher/GTA6.Installer/**"
+      - "Installer/**"
       - "Scripts/Build-OfflineInstaller.ps1"
       - ".github/workflows/offline-installer-build.yml"
   workflow_dispatch:
 
 jobs:
-  compile-installer-source:
+  compile-offline-installer:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "8.0.x"
-      - name: Build installer source without game payload
-        run: dotnet build Launcher/GTA6.Installer/GTA6.Installer.csproj --configuration Release
-      - name: Run installer security and payload tests
-        run: dotnet test Launcher/GTA6.Installer.Tests/GTA6.Installer.Tests.csproj --configuration Release --logger "console;verbosity=normal"
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+      - name: Prepare a placeholder game package for compiler validation
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force Build/Windows | Out-Null
+          Set-Content -LiteralPath Build/Windows/OpenWorldNextGen.exe -Value "CI placeholder only"
+      - name: Compile the complete offline installer script
+        shell: pwsh
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "ISCC.exe was not installed." }
+          & $iscc "/DAppVersion=0.1.0" "/DGameDir=$((Resolve-Path Build/Windows).Path)" Installer/GTA6.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed." }
+          $installer = "Build/Installer/GTA6-Setup-0.1.0-x64.exe"
+          if (-not (Test-Path $installer)) { throw "Installer output was not created." }
+          if ((Get-Item $installer).Length -le 0) { throw "Installer output is empty." }
