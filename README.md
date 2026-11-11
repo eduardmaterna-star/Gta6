@@ -38,3 +38,16 @@ Podrobnosti: `Docs/WINDOWS_BUILD_AND_TEST.md`.
 GitHub Actions provádí statické kontroly metadat projektu a zdrojů instalátoru. Tyto kontroly nenahrazují kompilaci Unreal Engine ani .NET aplikace.
 
 V tomto prostředí nebyl dostupný Unreal Editor, MSVC ani Windows .NET SDK. Kompilace, spuštění, herní testy, instalace a velikost výsledného instalátoru proto nejsou potvrzené.
+
+
+## Online instalátor pro Windows
+
+Zdroj instalátoru je v `Installer/`. Jde o malou online aplikaci, která načte distribuční manifest, stáhne herní soubory přes HTTPS a ověří jejich velikost a SHA-256 před instalací.
+
+- Výchozí instalace je per-user do `%LOCALAPPDATA%\Programs\GTA6`.
+- Herní build zatím není zveřejněn; `distribution/manifest.json` je záměrně prázdný.
+- Instalátor je zatím framework-dependent a vyžaduje .NET 8 Desktop Runtime.
+- Cílová velikost instalačního EXE je přibližně 50 MB; skutečnou velikost změří Windows CI.
+- Před veřejným vydáním je nutné doplnit kryptografický podpis manifestu a Authenticode podpis aplikací.
+
+Build instrukce: `Installer/README.md`.
