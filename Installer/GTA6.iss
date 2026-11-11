@@ -4,6 +4,9 @@
 #ifndef GameDir
   #error GameDir must point to the packaged Unreal Windows build directory.
 #endif
+#ifndef OutputDir
+  #error OutputDir must point to the generated installer directory.
+#endif
 
 [Setup]
 AppId={{B8E6A52D-73CF-4D12-AF66-5C5E0E31C6A2}
