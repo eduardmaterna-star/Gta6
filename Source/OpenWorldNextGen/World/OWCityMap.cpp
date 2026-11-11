@@ -114,6 +114,9 @@ void AOWCityMap::BuildDistrict()
         AddBox(ParkProps, TreeLocation + FVector(0.0f, 0.0f, 420.0f), FVector(260.0f, 260.0f, 260.0f));
     }
 
+    // A single seeded stream makes the same seed produce the same district layout.
+    FRandomStream RandomStream(GenerationSeed);
+
     for (int32 X = 0; X < CellCount; ++X)
     {
         for (int32 Y = 0; Y < CellCount; ++Y)
@@ -125,14 +128,13 @@ void AOWCityMap::BuildDistrict()
 
             const float BlockCenterX = (X - CellCount * 0.5f + 0.5f) * CellSize;
             const float BlockCenterY = (Y - CellCount * 0.5f + 0.5f) * CellSize;
-            const int32 BuildingCount = 3 + ((X * 7 + Y * 11) % 3);
+            const int32 BuildingCount = RandomStream.RandRange(3, 5);
 
             for (int32 BuildingIndex = 0; BuildingIndex < BuildingCount; ++BuildingIndex)
             {
-                const int32 Seed = X * 97 + Y * 31 + BuildingIndex * 17;
-                const float Width = 2200.0f + (Seed % 3) * 650.0f;
-                const float Depth = 2200.0f + ((Seed / 3) % 3) * 650.0f;
-                const float Height = 900.0f + (Seed % 7) * 650.0f;
+                const float Width = RandomStream.FRandRange(2200.0f, 3500.0f);
+                const float Depth = RandomStream.FRandRange(2200.0f, 3500.0f);
+                const float Height = RandomStream.FRandRange(900.0f, 4800.0f);
                 const float LocalX = ((BuildingIndex % 2) == 0 ? -1.0f : 1.0f) * 3900.0f;
                 const float LocalY = ((BuildingIndex / 2) - 0.5f) * 5000.0f;
                 AddBox(Buildings, FVector(BlockCenterX + LocalX, BlockCenterY + LocalY, Height * 0.5f + 70.0f), FVector(Width, Depth, Height));
