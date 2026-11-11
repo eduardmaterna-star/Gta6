@@ -23,3 +23,27 @@ World Partition is not enabled merely by writing an INI setting. The current gre
 
 ## Not claimed
 No Unreal C++ compilation, editor launch, packaged build, runtime test or FPS benchmark has been performed by this repository automation.
+
+
+## Civilian AI foundation (repository implementation)
+
+A first lightweight civilian character prototype is available at
+`Source/OpenWorldNextGen/AI/OWCivilianCharacter.*`.
+
+- Uses Unreal's built-in AIController and Navigation System.
+- Chooses random reachable NavMesh destinations around its current location.
+- Uses timers rather than a per-frame actor tick.
+- Retries safely if AI possession or navigation data is not ready.
+- Clears its timer and stops movement when the actor ends play.
+- Uses a temporary cube proxy until original character meshes and animations exist.
+
+### Editor setup and current limits
+
+To test it, place a `NavMeshBoundsVolume` over a walkable test area, build navigation,
+then place one or more `AOWCivilianCharacter` actors inside the bounds. The current
+greybox district does not yet include a configured NavMesh volume, so the class is
+not automatically spawned and no civilian population is claimed to be playable.
+
+This is basic wandering only. It does not implement traffic, crowd avoidance,
+perception, schedules, dialogue, police, combat, or mission behavior. Unreal C++
+compilation and in-editor behavior still require UE 5.8 on Windows.
