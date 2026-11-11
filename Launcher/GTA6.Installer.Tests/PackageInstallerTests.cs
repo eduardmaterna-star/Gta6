@@ -28,7 +28,16 @@ public sealed class PackageInstallerTests
     {
         using var temp = new TemporaryDirectory();
         var zip = CreateZip(("OpenWorldNextGen.exe", "game".ToBytes()));
-        var manifest = CreateManifest(zip) with { Sha256 = new string('0', 64) };
+        var validManifest = CreateManifest(zip);
+        var manifest = new ReleaseManifest
+        {
+            Product = validManifest.Product,
+            Version = validManifest.Version,
+            PackageFile = validManifest.PackageFile,
+            PackageUrl = null,
+            Sha256 = new string('0', 64),
+            Executable = validManifest.Executable
+        };
         using var stream = new MemoryStream(zip);
         var target = Path.Combine(temp.Path, "GTA6");
 
