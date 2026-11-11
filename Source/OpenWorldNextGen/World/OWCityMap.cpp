@@ -91,8 +91,8 @@ void AOWCityMap::BuildDistrict()
         const float SidewalkOffset = RoadWidth * 0.5f + 180.0f;
         for (float Side : { -1.0f, 1.0f })
         {
-            AddBox(Sidewalks, FVector(Coordinate + Side * SidewalkOffset, 0.0f, 35.0f), FVector(360.0f, CellCount * CellSize, 70.0f));
-            AddBox(Sidewalks, FVector(0.0f, Coordinate + Side * SidewalkOffset, 35.0f), FVector(CellCount * CellSize, 360.0f, 70.0f));
+            AddBox(Sidewalks, FVector(Coordinate + Side * SidewalkOffset, 0.0f, 10.0f), FVector(360.0f, CellCount * CellSize, 20.0f));
+            AddBox(Sidewalks, FVector(0.0f, Coordinate + Side * SidewalkOffset, 10.0f), FVector(CellCount * CellSize, 360.0f, 20.0f));
         }
     }
 
