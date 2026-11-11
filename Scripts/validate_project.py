@@ -87,6 +87,8 @@ def main() -> int:
             "Civilian wandering must not replace an active movement request.")
     require("EPathFollowingRequestResult::Failed" in civilian_source,
             "Civilian wandering must retry safely when a movement request fails.")
+    require("MinimumWanderDistance" in civilian_header and "DistSquared2D" in civilian_source,
+            "Civilian wandering must reject destinations that are too close to create visible movement.")
     require("PrimaryActorTick.bCanEverTick = false" in civilian_source,
             "Civilian prototype should remain timer-driven without an unnecessary per-frame tick.")
     require("ClearTimer(WanderTimerHandle)" in civilian_source,
