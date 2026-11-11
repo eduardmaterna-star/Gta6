@@ -3,7 +3,6 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
-#include "GameFramework/PlayerStart.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -54,11 +53,6 @@ void AOWCityMap::BeginPlay()
 {
     Super::BeginPlay();
     BuildDistrict();
-
-    if (GetWorld())
-    {
-        GetWorld()->SpawnActor<APlayerStart>(APlayerStart::StaticClass(), FVector(0.0f, 0.0f, 250.0f), FRotator::ZeroRotator);
-    }
 }
 
 void AOWCityMap::AddBox(UInstancedStaticMeshComponent* Component, const FVector& Center, const FVector& Size) const
