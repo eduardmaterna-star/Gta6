@@ -3,9 +3,12 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "OWInteractable.h"
+#include "UObject/ConstructorHelpers.h"
 
 AOWPlayerCharacter::AOWPlayerCharacter()
 {
@@ -30,6 +33,17 @@ AOWPlayerCharacter::AOWPlayerCharacter()
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;
+
+    // Temporary visible proxy until the original character model is produced.
+    PlaceholderBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaceholderBody"));
+    PlaceholderBody->SetupAttachment(RootComponent);
+    PlaceholderBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaceholderMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    if (PlaceholderMesh.Succeeded())
+    {
+        PlaceholderBody->SetStaticMesh(PlaceholderMesh.Object);
+        PlaceholderBody->SetRelativeScale3D(FVector(0.55f, 0.55f, 1.6f));
+    }
 }
 
 void AOWPlayerCharacter::BeginPlay()
@@ -55,7 +69,8 @@ void AOWPlayerCharacter::MoveForward(float Value)
 {
     if (Controller && !FMath::IsNearlyZero(Value))
     {
-        AddMovementInput(GetActorForwardVector(), Value);
+        const FRotator ControlRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
+        AddMovementInput(FRotationMatrix(ControlRotation).GetUnitAxis(EAxis::X), Value);
     }
 }
 
@@ -63,7 +78,8 @@ void AOWPlayerCharacter::MoveRight(float Value)
 {
     if (Controller && !FMath::IsNearlyZero(Value))
     {
-        AddMovementInput(GetActorRightVector(), Value);
+        const FRotator ControlRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
+        AddMovementInput(FRotationMatrix(ControlRotation).GetUnitAxis(EAxis::Y), Value);
     }
 }
 
