@@ -15,9 +15,13 @@ internal sealed class PackageInstaller
         manifest.Validate();
         if (!File.Exists(packagePath))
             throw new FileNotFoundException("Instalační balík nebyl nalezen.", packagePath);
+        if (string.IsNullOrWhiteSpace(installDirectory))
+            throw new InvalidOperationException("Instalační cesta není vyplněná.");
 
         progress.Report("Ověřuji integritu instalačního balíku…");
-        await using (var packageStream = File.OpenRead(packagePath))
+        await using (var packageStream = new FileStream(
+            packagePath, FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 1024,
+            FileOptions.Asynchronous | FileOptions.SequentialScan))
         {
             var actualHash = Convert.ToHexString(await SHA256.HashDataAsync(packageStream, cancellationToken));
             if (!actualHash.Equals(manifest.Sha256, StringComparison.OrdinalIgnoreCase))
@@ -25,8 +29,11 @@ internal sealed class PackageInstaller
         }
 
         var fullTarget = Path.GetFullPath(installDirectory);
-        if (fullTarget.TrimEnd(Path.DirectorySeparatorChar).Length < 4)
+        var trimmedTarget = Path.TrimEndingDirectorySeparator(fullTarget);
+        if (trimmedTarget.Length < 4 || string.Equals(trimmedTarget, Path.GetPathRoot(fullTarget),
+                StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Vybraná instalační cesta není bezpečná.");
+
         var parent = Directory.GetParent(fullTarget)?.FullName
             ?? throw new InvalidOperationException("Nelze určit nadřazenou instalační složku.");
         Directory.CreateDirectory(parent);
@@ -37,12 +44,18 @@ internal sealed class PackageInstaller
 
         try
         {
+            progress.Report("Kontroluji obsah herního balíku…");
+            var requiredBytes = GetUncompressedSize(packagePath, cancellationToken);
+            var drive = new DriveInfo(Path.GetPathRoot(staging)!);
+            var safetyMargin = 256L * 1024 * 1024;
+            if (requiredBytes > drive.AvailableFreeSpace - safetyMargin)
+                throw new IOException("Na cílovém disku není dostatek volného místa pro instalaci.");
+
             progress.Report("Rozbaluji herní soubory…");
             ExtractZipSafely(packagePath, staging, cancellationToken);
 
-            var executable = Path.GetFullPath(Path.Combine(staging, manifest.Executable));
-            if (!executable.StartsWith(staging + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
-                !File.Exists(executable))
+            var executable = ResolveContainedPath(staging, manifest.Executable);
+            if (!File.Exists(executable))
                 throw new InvalidDataException("Balík neobsahuje očekávaný spustitelný soubor hry.");
 
             await File.WriteAllTextAsync(
@@ -55,6 +68,8 @@ internal sealed class PackageInstaller
 
             if (Directory.Exists(fullTarget))
                 Directory.Move(fullTarget, backup);
+            else if (File.Exists(fullTarget))
+                throw new IOException("Cílová instalační cesta již existuje jako soubor.");
 
             try
             {
@@ -67,36 +82,141 @@ internal sealed class PackageInstaller
                 throw;
             }
 
-            if (Directory.Exists(backup))
-                Directory.Delete(backup, recursive: true);
+            // Backup cleanup is best-effort after the new installation is already committed.
+            try
+            {
+                if (Directory.Exists(backup))
+                    Directory.Delete(backup, recursive: true);
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
         }
         finally
         {
             if (Directory.Exists(staging))
                 Directory.Delete(staging, recursive: true);
-            // A backup is retained if rollback itself could not restore it.
         }
+    }
+
+    private static long GetUncompressedSize(string archivePath, CancellationToken token)
+    {
+        using var archive = ZipFile.OpenRead(archivePath);
+        long total = 0;
+        foreach (var entry in archive.Entries)
+        {
+            token.ThrowIfCancellationRequested();
+            if (IsDirectoryEntry(entry))
+                continue;
+            try { total = checked(total + entry.Length); }
+            catch (OverflowException ex)
+            {
+                throw new InvalidDataException("Velikost herního balíku je neplatná.", ex);
+            }
+        }
+        return total;
     }
 
     private static void ExtractZipSafely(string archivePath, string destination, CancellationToken token)
     {
-        var root = Path.GetFullPath(destination) + Path.DirectorySeparatorChar;
+        var root = Path.GetFullPath(destination);
+        var rootWithSeparator = Path.TrimEndingDirectorySeparator(root) + Path.DirectorySeparatorChar;
         using var archive = ZipFile.OpenRead(archivePath);
+        var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var entry in archive.Entries)
         {
             token.ThrowIfCancellationRequested();
-            if (string.IsNullOrEmpty(entry.Name))
+            var normalized = ValidateArchiveEntry(entry);
+            if (normalized is null)
                 continue;
 
-            var target = Path.GetFullPath(Path.Combine(destination, entry.FullName));
-            if (!target.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+            var target = Path.GetFullPath(Path.Combine(root, normalized.Replace('/', Path.DirectorySeparatorChar)));
+            if (!target.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException("ZIP obsahuje cestu mimo instalační složku.");
 
-            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            if (!seenPaths.Add(normalized.TrimEnd('/')))
+                throw new InvalidDataException("ZIP obsahuje duplicitní nebo kolidující cesty.");
+
+            if (IsDirectoryEntry(entry))
+            {
+                Directory.CreateDirectory(target);
+                continue;
+            }
+
+            var directory = Path.GetDirectoryName(target)!;
+            Directory.CreateDirectory(directory);
+            EnsureNoReparsePoint(root, directory);
+
             using var source = entry.Open();
-            using var output = new FileStream(target, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-            source.CopyTo(output);
+            using var output = new FileStream(target, FileMode.CreateNew, FileAccess.Write, FileShare.None, 1024 * 1024);
+            var buffer = new byte[1024 * 1024];
+            long copied = 0;
+            int read;
+            while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                token.ThrowIfCancellationRequested();
+                copied = checked(copied + read);
+                if (copied > entry.Length)
+                    throw new InvalidDataException("Rozbalený soubor překročil deklarovanou velikost.");
+                output.Write(buffer, 0, read);
+            }
+            if (copied != entry.Length)
+                throw new InvalidDataException("Rozbalený soubor neodpovídá deklarované velikosti.");
+        }
+    }
+
+    private static string? ValidateArchiveEntry(ZipArchiveEntry entry)
+    {
+        var name = entry.FullName.Replace('\\', '/');
+        if (string.IsNullOrWhiteSpace(name))
+            throw new InvalidDataException("ZIP obsahuje prázdnou cestu.");
+        if (name.StartsWith('/') || Path.IsPathRooted(name) ||
+            (name.Length >= 2 && char.IsLetter(name[0]) && name[1] == ':'))
+            throw new InvalidDataException("ZIP obsahuje absolutní cestu.");
+
+        var isDirectory = IsDirectoryEntry(entry);
+        var trimmed = isDirectory ? name.TrimEnd('/') : name;
+        var segments = trimmed.Split('/');
+        if (segments.Length == 0 || segments.Any(segment =>
+                segment.Length == 0 || segment is "." or ".." ||
+                segment.Contains(':') || segment.Any(char.IsControl) ||
+                segment.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0))
+            throw new InvalidDataException("ZIP obsahuje neplatnou nebo nebezpečnou cestu.");
+
+        // Unix symlinks and Windows reparse-point entries are not accepted.
+        var unixType = (entry.ExternalAttributes >> 16) & 0xF000;
+        var dosAttributes = entry.ExternalAttributes & 0xFFFF;
+        if (unixType == 0xA000 || (dosAttributes & 0x0400) != 0)
+            throw new InvalidDataException("ZIP obsahuje symbolický odkaz nebo reparse point.");
+
+        return string.Join('/', segments) + (isDirectory ? "/" : "");
+    }
+
+    private static bool IsDirectoryEntry(ZipArchiveEntry entry) =>
+        entry.FullName.EndsWith('/') || entry.FullName.EndsWith('\\');
+
+    private static string ResolveContainedPath(string root, string relativePath)
+    {
+        var fullRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        var fullPath = Path.GetFullPath(Path.Combine(fullRoot,
+            relativePath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar)));
+        if (!fullPath.StartsWith(fullRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("Cesta ke spustitelnému souboru opouští instalační složku.");
+        return fullPath;
+    }
+
+    private static void EnsureNoReparsePoint(string root, string directory)
+    {
+        var current = directory;
+        var fullRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        while (current.Length >= fullRoot.Length)
+        {
+            if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+                throw new InvalidDataException("Instalační cesta obsahuje nepovolený symbolický odkaz.");
+            if (string.Equals(current, fullRoot, StringComparison.OrdinalIgnoreCase))
+                return;
+            current = Directory.GetParent(current)?.FullName
+                ?? throw new InvalidDataException("Nelze ověřit instalační cestu.");
         }
     }
 }
