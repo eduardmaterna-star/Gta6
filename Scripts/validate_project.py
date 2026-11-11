@@ -101,6 +101,12 @@ def main() -> int:
     require("\"NavigationSystem\"" in (ROOT / "Source/OpenWorldNextGen/OpenWorldNextGen.Build.cs").read_text(encoding="utf-8"),
             "NavigationSystem dependency is required by the civilian prototype.")
 
+    city_map_header = (ROOT / "Source/OpenWorldNextGen/World/OWCityMap.h").read_text(encoding="utf-8")
+    require("GenerationSeed" in city_map_header and "FRandomStream RandomStream(GenerationSeed)" in city_map_source,
+            "District generation must use an explicit reproducible seed.")
+    require("RandomStream.RandRange(3, 5)" in city_map_source and "RandomStream.FRandRange" in city_map_source,
+            "Building count and dimensions must use the seeded district random stream.")
+
     require("Component->SetCollisionEnabled(ECollisionEnabled::NoCollision)" in city_map_source,
             "Decorative props should not add unnecessary physics collision.")
 
