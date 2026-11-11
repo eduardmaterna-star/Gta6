@@ -1,0 +1,13 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "",
+  "Category": "Games",
+  "Description": "Original open-world crime game set in a fictionalized version of Prague.",
+  "Modules": [
+    {
+      "Name": "OpenWorldNextGen",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}
