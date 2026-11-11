@@ -34,7 +34,8 @@ if (-not $iscc) {
 
 New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
 $gameDirForCompiler = $gameDir.Replace('"', '""')
-& $iscc "/DAppVersion=$Version" "/DGameDir=$gameDirForCompiler" $scriptPath
+$outputDirForCompiler = $outputDir.Replace('"', '""')
+& $iscc "/DAppVersion=$Version" "/DGameDir=$gameDirForCompiler" "/DOutputDir=$outputDirForCompiler" $scriptPath
 if ($LASTEXITCODE -ne 0) {
     throw "Inno Setup compilation failed with exit code $LASTEXITCODE."
 }
