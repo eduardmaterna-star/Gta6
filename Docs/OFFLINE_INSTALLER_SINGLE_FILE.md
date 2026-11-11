@@ -27,3 +27,17 @@ Generated binary payloads are not committed to ordinary Git history. Release EXE
 
 ## Current limitation
 No packaged Unreal Windows build exists yet. Therefore the final installer cannot yet be produced or measured. The source work does not claim an installer EXE already exists.
+
+
+## Installer safety checks
+
+The installer source also performs the following checks before committing an installation:
+
+- Verifies the package SHA-256 before extraction.
+- Calculates the ZIP's declared uncompressed size and checks available space on the target drive, leaving a 256 MiB safety margin.
+- Rejects absolute paths, traversal segments, drive prefixes, alternate-separator traversal, invalid path characters, duplicate paths, symbolic links and reparse-point entries.
+- Creates files exclusively and checks that each extracted file matches its declared ZIP length.
+- Extracts into a fresh staging directory and restores the previous installation if the final directory swap fails.
+- Keeps the previous backup if cleanup cannot safely complete.
+
+These are source-level safeguards, not a substitute for automated adversarial ZIP tests or a Windows installation test. The current resource-embedding pipeline is still provisional for multi-gigabyte packages; see [issue #6](https://github.com/eduardmaterna-star/Gta6/issues/6) for the required payload-format verification and test plan.
