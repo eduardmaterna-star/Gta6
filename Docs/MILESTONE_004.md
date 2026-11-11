@@ -33,6 +33,8 @@ A first lightweight civilian character prototype is available at
 - Uses Unreal's built-in AIController and Navigation System.
 - Chooses random reachable NavMesh destinations around its current location.
 - Uses timers rather than a per-frame actor tick.
+- Rejects destinations too close to produce meaningful visible movement.
+- Enables Unreal CharacterMovement's basic RVO local avoidance; this is not a full crowd simulation.
 - Retries safely if AI possession or navigation data is not ready.
 - Clears its timer and stops movement when the actor ends play.
 - Uses a temporary cube proxy until original character meshes and animations exist.
