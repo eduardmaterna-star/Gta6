@@ -100,6 +100,15 @@ void AOWCivilianCharacter::ChooseNextWanderDestination()
         return;
     }
 
+    const float EffectiveMinimumDistance = FMath::Min(MinimumWanderDistance, WanderRadius * 0.8f);
+    if (FVector::DistSquared2D(GetActorLocation(), Destination.Location)
+        < FMath::Square(EffectiveMinimumDistance))
+    {
+        // Avoid selecting a point so close that the civilian appears stationary.
+        ScheduleNextAttempt(1.5f);
+        return;
+    }
+
     const EPathFollowingRequestResult::Type RequestResult =
         AIController->MoveToLocation(Destination.Location, AcceptanceRadius);
 
