@@ -37,6 +37,10 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "Map")
     TObjectPtr<UInstancedStaticMeshComponent> ParkProps;
 
+    // Stable seed keeps generated blockout layouts reproducible across runs.
+    UPROPERTY(EditDefaultsOnly, Category = "Map|Generation")
+    int32 GenerationSeed = 20261111;
+
     void BuildDistrict();
     void AddBox(UInstancedStaticMeshComponent* Component, const FVector& Center, const FVector& Size) const;
 };
