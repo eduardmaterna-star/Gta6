@@ -49,3 +49,8 @@ not automatically spawned and no civilian population is claimed to be playable.
 This is basic wandering only. It does not implement traffic, crowd avoidance,
 perception, schedules, dialogue, police, combat, or mission behavior. Unreal C++
 compilation and in-editor behavior still require UE 5.8 on Windows.
+
+
+## Reproducible greybox variation
+
+The runtime district now exposes an editor-default `GenerationSeed`. Building counts and dimensions are generated from one `FRandomStream` initialized with that seed, so a given seed produces a repeatable layout while changing the seed produces a different blockout. This remains a small single-actor greybox generator; it is not World Partition, a road graph, or a production city-generation system.
