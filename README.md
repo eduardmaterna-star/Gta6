@@ -15,11 +15,11 @@ Samostatná originální open-world akční hra inspirovaná kriminálním žán
 ## Distribuce
 Vybraná varianta je **jeden kompletní offline instalátor pro Windows x64**. Výsledný EXE bude obsahovat instalační aplikaci i celý zabalený herní payload. Instalace nebude potřebovat internet ani samostatný ZIP.
 
-- Zdroj instalátoru: Launcher/GTA6.Installer
+- Zdroj instalátoru: Installer/GTA6.iss (Inno Setup)
 - Build skript: Scripts/Build-OfflineInstaller.ps1
 - Architektura a stav: Docs/OFFLINE_INSTALLER_SINGLE_FILE.md
 
-Velikost 50 MB není realistická pro kompletní hru. Finální instalátor bude obsahovat samostatný .NET runtime a komprimované herní soubory, takže může mít několik GB nebo více. Přesnou velikost zjistíme až po vytvoření skutečného Unreal Windows buildu.
+Velikost 50 MB není realistická pro kompletní hru. Finální instalátor obsahuje komprimované herní soubory. Jeden Windows EXE má praktický limit necelé 4 GiB; pokud komprimovaný herní balík tento limit překročí, bude nutné zmenšit balík nebo změnit distribuční formát. Přesnou velikost zjistíme až po vytvoření skutečného Unreal Windows buildu.
 
 ## Aktuální stav hry
 **Milestone 002 — první runtime greybox čtvrť.** Obsahuje C++ third-person prototyp a procedurálně poskládanou blokovou čtvrť. Nejde zatím o detailní Prahu ani o finální mapu.
@@ -33,6 +33,6 @@ Velikost 50 MB není realistická pro kompletní hru. Finální instalátor bude
 Podrobnosti: Docs/WINDOWS_BUILD_AND_TEST.md.
 
 ## Ověření
-GitHub Actions provádí statické kontroly metadat projektu a zdrojů instalátoru. Tyto kontroly nenahrazují kompilaci Unreal Engine ani .NET aplikace.
+GitHub Actions ověřuje kompilaci Inno Setup instalačního skriptu s testovacím souborem. To nenahrazuje kompilaci Unreal Engine ani test instalace skutečné hry.
 
 V tomto prostředí nebyl dostupný Unreal Editor, MSVC ani Windows .NET SDK. Kompilace, spuštění, herní testy, instalace a velikost výsledného instalátoru proto nejsou potvrzené.
