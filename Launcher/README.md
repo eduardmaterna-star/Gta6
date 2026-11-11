@@ -1,34 +1,25 @@
-# GTA6 Installer — single-file offline distribution
+# GTA6 offline installer
 
-The selected release format is one Windows x64 executable containing both the installer application and the complete compressed Unreal game payload. Installation must work with networking disabled.
+The shipping installer is built with Inno Setup, not the legacy .NET launcher prototype.
 
-## Build input
-- A complete Unreal Engine 5.8 Windows x64 packaged build in Build/Windows.
-- The packaged game executable must be OpenWorldNextGen.exe at the payload root.
-- .NET 8 SDK and 7-Zip command-line executable (7z.exe) on the Windows build machine.
+## Requirements
+- Windows build machine.
+- Inno Setup 6.5.2 or newer (ISCC.exe).
+- Complete Unreal Engine 5.8 Windows x64 packaged build in Build/Windows.
+- OpenWorldNextGen.exe at the root of the packaged folder.
 
 ## Build
+
 Run from the repository root:
 
-```powershell
-.\Scripts\Build-OfflineInstaller.ps1 -Version 0.1.0
-```
+    .\\Scripts\\Build-OfflineInstaller.ps1 -Version 0.1.0
 
-The script archives the game, creates a manifest with SHA-256, embeds both files into the WinForms installer project and publishes a self-contained single-file win-x64 EXE. The final file is written to Build/Installer.
+The resulting single offline installer is written to Build/Installer/GTA6-Setup-0.1.0-x64.exe. The complete contents of Build/Windows are embedded by Inno Setup; no external archive, sidecar file, downloader, or internet connection is required at install time.
 
-## Install behavior
-- Reads manifest and package from embedded resources only.
-- No downloader, online manifest, external ZIP or internet connection.
-- Verifies package SHA-256 before extraction.
-- Extracts to a staging directory, validates the game executable and swaps the staged directory into place.
-- Uses a per-user LocalAppData destination by default; no elevation.
-- Does not delete user saves/configuration as part of replacing the game folder.
+## Size limit
 
-## Size
-The installer includes a self-contained .NET runtime plus the complete compressed game. It will be much larger than 50 MB and will grow with the game. The final size is only known after a real Unreal packaged build and must be measured.
+Inno Setup 6.5.2+ supports a single Setup EXE up to nearly 4 GiB. The build script rejects an output at or above 4 GiB. If the compressed game exceeds this Windows executable limit, a single-file installer cannot be produced in this format.
 
-## Limitations before release
-- The Unreal Windows payload is not present yet.
-- A clean-machine offline installation and launch test is still required.
-- Code signing and a release SHA-256 publication process are still required.
-- Large generated binaries are not stored in ordinary Git history; publish the final EXE as a GitHub Release asset.
+## Validation
+
+GitHub Actions compiles the installer script with a placeholder executable. This checks installer syntax and output creation only. A real release still requires a packaged Unreal build, clean Windows offline installation test, game launch test, and SHA-256 publication.
