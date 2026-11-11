@@ -1,0 +1,8 @@
+{
+  "product": "GTA6",
+  "version": "0.1.0",
+  "packageFile": "GTA6-Windows-0.1.0.zip",
+  "packageUrl": "https://downloads.example.invalid/gta6/stable/GTA6-Windows-0.1.0.zip",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "executable": "GTA6/Binaries/Win64/GTA6.exe"
+}
