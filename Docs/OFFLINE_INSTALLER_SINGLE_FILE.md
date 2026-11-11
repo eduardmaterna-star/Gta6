@@ -1,43 +1,40 @@
-# GTA6 — single-file offline installer
+# GTA6 — kompletní offline instalátor pro Windows
 
-The selected distribution is one Windows x64 EXE containing the installer and the complete packaged game. Installation must work without internet access or separate ZIP/manifest files. The EXE will be much larger than 50 MB: it includes a self-contained .NET runtime and the compressed Unreal game payload.
+Distribuční formát je jeden Windows x64 soubor EXE, který obsahuje instalační program i všechny soubory zabalené hry. Instalace nevyžaduje internet ani další ZIP/manifest soubory.
 
-## Build pipeline
-1. Package the Unreal project for Windows x64 using UE 5.8.
-2. Stage the complete output in Build/Windows. Expected entry point: OpenWorldNextGen.exe in the package root.
-3. Create a ZIP archive and generate a manifest with version, relative executable path and SHA-256.
-4. Publish the WinForms installer as a self-contained single-file .NET 8 Windows x64 EXE, embedding the ZIP and manifest as resources.
-5. Test installation and launch on a clean Windows machine with networking disabled.
+## Zvolená technologie
 
-## Layout
-- Build/Windows: packaged Unreal build (not committed)
-- Build/Offline: generated ZIP and manifest (not committed)
-- Build/Installer: final EXE (not committed)
-- Launcher/GTA6.Installer: installer source
-- Scripts/Build-OfflineInstaller.ps1: packaging script
+Používáme **Inno Setup 6.5.2 nebo novější**. Jeho vlastní instalační formát je vhodnější než připojování dat za .NET single-file EXE: .NET single-file host očekává vlastní bundle metadata na konci souboru, takže prosté připojení dat za hotový EXE není bezpečný formát.
 
-Generated binary payloads are not committed to ordinary Git history. Release EXEs should be distributed as GitHub Release assets or through binary hosting.
+Inno Setup od verze 6.5.2 umí vytvořit jeden Setup.exe o velikosti téměř 4 GiB. To je zároveň praktický limit Windows PE souboru. Pokud komprimovaná hra limit překročí, požadavek na jediný EXE nebude možné splnit bez změny distribuce nebo zmenšení herního balíku. Zdroj: https://jrsoftware.org/files/is6-whatsnew.htm.
 
-## Install behavior
-- Embedded manifest and game package only; no network requests.
-- SHA-256 verification before extraction.
-- Staging directory, executable validation and rollback-capable directory replacement.
-- Per-user install under LocalAppData; no elevation.
-- User saves/configuration must remain outside the replaceable game directory.
+## Build
 
-## Current limitation
-No packaged Unreal Windows build exists yet. Therefore the final installer cannot yet be produced or measured. The source work does not claim an installer EXE already exists.
+1. Zabalit Unreal Engine 5.8 projekt pro Windows x64.
+2. Umístit celý výstup do Build/Windows.
+3. Ověřit, že hlavní spustitelný soubor je OpenWorldNextGen.exe v kořeni této složky.
+4. Nainstalovat Inno Setup 6.5.2+ na Windows build stroj.
+5. Spustit z kořene repozitáře:
 
+    .\\Scripts\\Build-OfflineInstaller.ps1 -Version 0.1.0
 
-## Installer safety checks
+Výstup: Build/Installer/GTA6-Setup-0.1.0-x64.exe.
 
-The installer reads the embedded ZIP directly as a seekable assembly resource stream; it does not create an additional temporary copy of the full archive. It hashes and rewinds the stream before inspecting and extracting the ZIP. The installer source also performs the following checks before committing an installation:
+Inno Setup zabalí celý obsah Build/Windows přímo do jediného offline instalátoru. Build skript zkontroluje, že výsledný EXE nepřekročil hranici 4 GiB, a vypíše SHA-256.
 
-- Verifies the package SHA-256 before extraction.
-- Calculates the ZIP's declared uncompressed size and checks available space on the target drive, leaving a 256 MiB safety margin.
-- Rejects absolute paths, traversal segments, drive prefixes, alternate-separator traversal, invalid path characters, duplicate paths, symbolic links and reparse-point entries.
-- Creates files exclusively and checks that each extracted file matches its declared ZIP length.
-- Extracts into a fresh staging directory and restores the previous installation if the final directory swap fails.
-- Keeps the previous backup if cleanup cannot safely complete.
+## Vlastnosti instalace
 
-These are source-level safeguards, not a substitute for automated adversarial ZIP tests or a Windows installation test. The current resource-embedding pipeline is still provisional for multi-gigabyte packages; see [issue #6](https://github.com/eduardmaterna-star/Gta6/issues/6) for the required payload-format verification and test plan.
+- Veškeré herní soubory jsou uvnitř instalátoru.
+- Žádné stahování, online manifest ani externí archiv.
+- Instalace do %LOCALAPPDATA%\\Programs\\GTA6 bez administrátorských práv.
+- Odinstalace přes standardní Windows seznam aplikací.
+- Volitelná ikona na ploše a spuštění hry po instalaci.
+- Inno Setup kontroluje integritu instalovaných dat pomocí svého instalačního formátu.
+
+## CI
+
+GitHub Actions instaluje Inno Setup a kompiluje instalační skript s malým testovacím souborem místo skutečné hry. Tím ověřuje syntaxi skriptu a vznik instalačního EXE, nikoli funkčnost skutečného Unreal buildu.
+
+## Aktuální omezení
+
+V repozitáři zatím není skutečný kompletní Windows build hry. Proto zatím neexistuje finální instalační EXE, nelze změřit jeho velikost a nebyl proveden test instalace na čistém Windows bez internetu. Reálný herní balík musí být vytvořen v Unreal Engine na Windows.
