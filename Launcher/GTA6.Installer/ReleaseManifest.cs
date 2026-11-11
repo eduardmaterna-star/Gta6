@@ -38,7 +38,7 @@ internal sealed class ReleaseManifest
     {
         if (!string.Equals(Product, "GTA6", StringComparison.Ordinal))
             throw new InvalidDataException("Manifest nepatří produktu GTA6.");
-        if (!Version.TryParse(Version, out _))
+        if (!System.Version.TryParse(Version, out _))
             throw new InvalidDataException("Verze musí mít formát číselné verze, například 0.1.0.");
         if (string.IsNullOrWhiteSpace(PackageFile) ||
             Path.GetFileName(PackageFile) != PackageFile ||
