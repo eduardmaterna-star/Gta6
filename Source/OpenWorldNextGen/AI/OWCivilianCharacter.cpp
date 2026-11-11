@@ -6,6 +6,7 @@
 #include "Engine/StaticMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NavigationSystem.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 AOWCivilianCharacter::AOWCivilianCharacter()
@@ -78,6 +79,14 @@ void AOWCivilianCharacter::ChooseNextWanderDestination()
         return;
     }
 
+    // Do not replace a path that is still being followed. Long routes may take
+    // longer than WanderInterval, especially when the NavMesh is obstructed.
+    if (AIController->GetMoveStatus() == EPathFollowingStatus::Moving)
+    {
+        ScheduleNextAttempt(1.0f);
+        return;
+    }
+
     FNavLocation Destination;
     const bool bFoundDestination = NavigationSystem->GetRandomReachablePointInRadius(
         GetActorLocation(),
@@ -91,6 +100,14 @@ void AOWCivilianCharacter::ChooseNextWanderDestination()
         return;
     }
 
-    AIController->MoveToLocation(Destination.Location, AcceptanceRadius);
+    const EPathFollowingRequestResult::Type RequestResult =
+        AIController->MoveToLocation(Destination.Location, AcceptanceRadius);
+
+    if (RequestResult == EPathFollowingRequestResult::Failed)
+    {
+        ScheduleNextAttempt(2.0f);
+        return;
+    }
+
     ScheduleNextAttempt(FMath::FRandRange(WanderInterval * 0.75f, WanderInterval * 1.25f));
 }
