@@ -12,42 +12,27 @@ Samostatná originální open-world akční hra inspirovaná kriminálním žán
 - Nejprve singleplayer; multiplayer se posoudí v pozdější fázi.
 - Výkonový cíl 1080p / 120 FPS je požadavek k ověření, ne naměřený výsledek.
 
-## Distribuce pro Windows
-Projekt obsahuje prototyp kombinovaného instalátoru:
-- malá aplikace Windows pro online i offline instalaci,
-- online zdroj přes HTTPS manifest a ZIP balík,
-- offline zdroj z lokální složky se stejným manifestem a ZIP balíkem,
-- kontrola SHA-256, bezpečné rozbalení a instalace přes staging adresář.
+## Distribuce
+Vybraná varianta je **jeden kompletní offline instalátor pro Windows x64**. Výsledný EXE bude obsahovat instalační aplikaci i celý zabalený herní payload. Instalace nebude potřebovat internet ani samostatný ZIP.
 
-Dokumentace: `Docs/DISTRIBUTION_ARCHITECTURE.md` a `Launcher/README.md`.
+- Zdroj instalátoru: Launcher/GTA6.Installer
+- Build skript: Scripts/Build-OfflineInstaller.ps1
+- Architektura a stav: Docs/OFFLINE_INSTALLER_SINGLE_FILE.md
 
-Cíl přibližně 50 MB se týká pouze instalátoru, nikoli celé hry. Aktuální prototyp je framework-dependent .NET 8 WinForms aplikace a na cílovém počítači proto vyžaduje .NET 8 Desktop Runtime. Skutečnou velikost EXE zatím nelze uvést, protože nebyl proveden Windows publish. Online server, herní balík a podepsané vydání zatím nejsou připravené.
+Velikost 50 MB není realistická pro kompletní hru. Finální instalátor bude obsahovat samostatný .NET runtime a komprimované herní soubory, takže může mít několik GB nebo více. Přesnou velikost zjistíme až po vytvoření skutečného Unreal Windows buildu.
 
 ## Aktuální stav hry
 **Milestone 002 — první runtime greybox čtvrť.** Obsahuje C++ third-person prototyp a procedurálně poskládanou blokovou čtvrť. Nejde zatím o detailní Prahu ani o finální mapu.
 
-**Milestone 004 — projektová základna.** Připraveny jsou projektové konfigurační soubory, statické CI kontroly a dokumentace pro lokální Windows build. Skutečný World Partition `.umap` musí být vytvořen v Unreal Editoru.
+**Milestone 004 — projektová základna.** Připraveny jsou projektové konfigurační soubory, statické CI kontroly a dokumentace pro lokální Windows build. Skutečný World Partition .umap musí být vytvořen v Unreal Editoru.
 
 ## Požadavky pro lokální build hry
 - Unreal Engine 5.8.x.
 - Visual Studio 2022 s C++ workloady a Windows SDK.
 
-Podrobnosti: `Docs/WINDOWS_BUILD_AND_TEST.md`.
+Podrobnosti: Docs/WINDOWS_BUILD_AND_TEST.md.
 
 ## Ověření
 GitHub Actions provádí statické kontroly metadat projektu a zdrojů instalátoru. Tyto kontroly nenahrazují kompilaci Unreal Engine ani .NET aplikace.
 
 V tomto prostředí nebyl dostupný Unreal Editor, MSVC ani Windows .NET SDK. Kompilace, spuštění, herní testy, instalace a velikost výsledného instalátoru proto nejsou potvrzené.
-
-
-## Online instalátor pro Windows
-
-Zdroj instalátoru je v `Installer/`. Jde o malou online aplikaci, která načte distribuční manifest, stáhne herní soubory přes HTTPS a ověří jejich velikost a SHA-256 před instalací.
-
-- Výchozí instalace je per-user do `%LOCALAPPDATA%\Programs\GTA6`.
-- Herní build zatím není zveřejněn; `distribution/manifest.json` je záměrně prázdný.
-- Instalátor je zatím framework-dependent a vyžaduje .NET 8 Desktop Runtime.
-- Cílová velikost instalačního EXE je přibližně 50 MB; skutečnou velikost změří Windows CI.
-- Před veřejným vydáním je nutné doplnit kryptografický podpis manifestu a Authenticode podpis aplikací.
-
-Build instrukce: `Installer/README.md`.
