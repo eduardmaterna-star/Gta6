@@ -9,4 +9,5 @@
     <RootNamespace>GTA6.Installer</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon></ApplicationIcon>
+    <InternalsVisibleTo Include="GTA6.Installer.Tests" />
   </PropertyGroup></Project>
