@@ -24,7 +24,7 @@ Velikost 50 MB není realistická pro kompletní hru. Finální instalátor obsa
 ## Aktuální stav hry
 **Milestone 002 — první runtime greybox čtvrť.** Obsahuje C++ third-person prototyp a procedurálně poskládanou blokovou čtvrť. Nejde zatím o detailní Prahu ani o finální mapu.
 
-**Milestone 004 — projektová základna.** Připraveny jsou projektové konfigurační soubory, statické CI kontroly a dokumentace pro lokální Windows build. Skutečný World Partition .umap musí být vytvořen v Unreal Editoru.
+**Milestone 004 — projektová základna.** Připraveny jsou projektové konfigurační soubory, statické CI kontroly a dokumentace pro lokální Windows build. Přidaný je první C++ základ civilního NPC s AIControllerem a časovačem řízeným pohybem po dosažitelných bodech NavMeshe; pro jeho testování je stále nutné vytvořit NavMeshBoundsVolume v editoru. Skutečný World Partition .umap musí být vytvořen v Unreal Editoru.
 
 ## Požadavky pro lokální build hry
 - Unreal Engine 5.8.x.
