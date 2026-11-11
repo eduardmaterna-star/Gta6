@@ -8,5 +8,10 @@
     <AssemblyName>GTA6Installer</AssemblyName>
     <RootNamespace>GTA6.Installer</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon></ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup Condition="'$(GamePackagePath)' != '' and '$(OfflineManifestPath)' != ''">
+    <EmbeddedResource Include="$(GamePackagePath)" LogicalName="GTA6.Installer.OfflinePackage.zip" />
+    <EmbeddedResource Include="$(OfflineManifestPath)" LogicalName="GTA6.Installer.offline-manifest.json" />
+  </ItemGroup>
 </Project>
