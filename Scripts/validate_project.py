@@ -62,6 +62,10 @@ def main() -> int:
             "GameMode must reuse a level-authored PlayerStart instead of creating a duplicate.")
     require("SpawnActor<APlayerStart>" not in city_map_source,
             "City map must not create PlayerStart during its late BeginPlay.")
+    require("TActorIterator<AOWCityMap>" in game_mode_source,
+            "GameMode must reuse an editor-authored city map instead of spawning duplicate runtime geometry.")
+    require("failed to spawn the fallback city map" in game_mode_source,
+            "GameMode must report a failed fallback city-map spawn.")
 
     input_config = (ROOT / "Config/DefaultInput.ini").read_text(encoding="utf-8")
     for mapping in ("MoveForward", "MoveRight", "Turn", "LookUp", "Jump", "Interact"):
