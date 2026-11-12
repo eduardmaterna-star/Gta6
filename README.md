@@ -32,6 +32,10 @@ Velikost 50 MB není realistická pro kompletní hru. Finální instalátor obsa
 
 Podrobnosti: Docs/WINDOWS_BUILD_AND_TEST.md.
 
+## Architektura a QA
+- `Docs/TECHNICAL_ARCHITECTURE.md` — hranice herních systémů, datové toky a implementační pořadí.
+- `Docs/QA_ACCEPTANCE_MATRIX.md` — požadované testy a důkazy pro dokončení funkcí.
+
 ## Ověření
 GitHub Actions ověřuje kompilaci Inno Setup instalačního skriptu s testovacím souborem. To nenahrazuje kompilaci Unreal Engine ani test instalace skutečné hry.
 
