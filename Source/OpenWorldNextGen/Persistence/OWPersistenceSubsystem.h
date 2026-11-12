@@ -14,7 +14,7 @@ class OPENWORLDNEXTGEN_API UOWPersistenceSubsystem : public UGameInstanceSubsyst
 
 public:
     UFUNCTION(BlueprintCallable, Category = "Persistence")
-    bool SaveCurrentGame(FName SelectedCharacterId = TEXT("Default"));
+    bool SaveCurrentGame(FName SelectedCharacterId = NAME_None);
 
     UFUNCTION(BlueprintCallable, Category = "Persistence")
     bool LoadCurrentGame();
