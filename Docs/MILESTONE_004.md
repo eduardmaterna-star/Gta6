@@ -63,3 +63,7 @@ The cell count is clamped to 2–12 and the cell size to 80–300 metres, both i
 and again at runtime. This allows controlled prototype-size experiments while keeping the
 single-actor generator bounded. It does not provide world streaming or production-scale city
 generation; larger worlds still require editor-authored World Partition cells and profiling.
+
+Building footprints and their row spacing scale with the selected cell size, so the smaller
+supported district presets do not retain the original 180-metre block offsets. The seeded
+random stream still controls building counts and dimensions within that scaled layout.
