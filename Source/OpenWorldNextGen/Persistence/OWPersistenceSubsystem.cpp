@@ -27,6 +27,7 @@ namespace
         const FVector Scale = Transform.GetScale3D();
         return IsFiniteVector(Transform.GetLocation()) &&
                IsFiniteQuaternion(Transform.GetRotation()) &&
+               !FMath::IsNearlyZero(Transform.GetRotation().SizeSquared()) &&
                IsFiniteVector(Scale) &&
                !FMath::IsNearlyZero(Scale.X) &&
                !FMath::IsNearlyZero(Scale.Y) &&
@@ -82,9 +83,9 @@ bool UOWPersistenceSubsystem::ValidateSaveData(
         return false;
     }
 
-    if (SaveData->SelectedCharacterId.IsNone())
+    if (SaveData->SelectedCharacterId.IsNone() || SaveData->SavedAtUtc.IsEmpty())
     {
-        OutError = TEXT("Save data does not contain a selected character identifier.");
+        OutError = TEXT("Save data is missing its selected character identifier or UTC timestamp.");
         return false;
     }
 
