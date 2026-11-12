@@ -45,3 +45,8 @@ V tomto prostředí nebyl dostupný Unreal Editor, MSVC ani Windows .NET SDK. Ko
 ## Save/load development
 
 See [save/load setup and verification requirements](Docs/SAVE_LOAD_SETUP.md) for the initial versioned persistence slice and its remaining UE 5.8 runtime tests.
+
+
+## Vehicle prototype
+
+See [vehicle prototype setup and limitations](Docs/VEHICLE_PROTOTYPE_SETUP.md) for the first physics-driven vehicle source slice and its pending UE 5.8 tests.
