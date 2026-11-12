@@ -79,12 +79,13 @@ Implemented in source:
 - runtime-generated greybox district using instanced cube meshes;
 - timer-driven civilian wandering prototype using AIController and NavMesh queries;
 - bounded civilian population spawner source with seeded candidate sampling, NavMesh projection/path checks, collision-safe spawning and owned-actor cleanup;
+- versioned SaveGame data schema and game-instance persistence subsystem with map/transform validation and primary/backup slots;
 - static repository validation and installer-source validation.
 
 Not implemented or not verified:
 - real editor-authored World Partition map;
 - editor-authored test map with configured NavMesh and runtime-verified civilian population spawner;
-- save/load;
+- UnrealHeaderTool/MSVC build and packaged runtime verification of the new save/load source;
 - vehicles and traffic;
 - police and gangs;
 - mission framework and branching story;
