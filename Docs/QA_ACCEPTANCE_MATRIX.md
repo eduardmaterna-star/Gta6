@@ -37,11 +37,13 @@ This matrix is the minimum evidence required before marking a feature complete. 
 - A population test verifies the configured cap and records CPU/memory/path request rates.
 - The spawner uses bounded location attempts, validates a path from its origin, staggers spawns, and cleans up all owned civilians on EndPlay.
 
-### Save/load (when implemented)
-- Save survives application restart.
-- Invalid/corrupt/unsupported save data is rejected without destroying the last valid save.
-- Player transform and completed mission state are restored consistently.
-- Save schema migration is covered by tests.
+### Save/load (source slice implemented; engine/runtime acceptance pending)
+- Schema version, map identifier, player transform, selected-character ID and UTC timestamp are serialized.
+- Unsupported schema, map mismatch, missing required fields and non-finite/zero-scale transforms are rejected before applying player state.
+- A valid existing primary slot is copied to the backup slot before primary replacement; a failed backup write aborts replacement.
+- Load validates the primary slot and falls back to a validated backup before changing the player pawn.
+- Packaged Development tests must prove restart persistence, corrupt/truncated slot recovery, backup fallback and unchanged world state after failed load.
+- Unreal Automation tests and future schema migration tests remain required before issue #7 can close.
 
 ### Vehicles, police, gangs and missions (when implemented)
 - Each system has explicit state transitions, invalid-input handling and cancellation/cleanup behavior.
@@ -51,9 +53,9 @@ This matrix is the minimum evidence required before marking a feature complete. 
 
 ## Current verification status (2026-11-12)
 
-- Repository static validation: pending for the current civilian population implementation commit.
-- Installer source validation: previously passed on an earlier commit; it only checks source configuration.
-- Unreal C++ compilation: not run in this environment.
+- Repository static validation: current commit result must be checked in GitHub Actions; checks are source-level only.
+- Installer source validation: source configuration checks only; no real game executable is packaged or launched.
+- Unreal C++ compilation (including the new persistence subsystem): not run in this environment.
 - Unreal Editor/runtime tests: not run.
 - Packaged Windows game and offline installation: not verified.
 - Performance measurements: not available.
