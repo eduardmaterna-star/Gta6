@@ -1,0 +1,45 @@
+name: Package source project
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/source-archive.yml"
+      - "Config/**"
+      - "Docs/**"
+      - "Installer/**"
+      - "Launcher/**"
+      - "Scripts/**"
+      - "Source/**"
+      - "distribution/**"
+      - "OPEN_WORLD_Next_Gen.uproject"
+      - "README.md"
+      - ".gitignore"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Create source ZIP
+        shell: bash
+        run: |
+          git archive --format=zip --prefix=OpenWorldNextGen/ HEAD -o OpenWorldNextGen-Source.zip
+          test -s OpenWorldNextGen-Source.zip
+          unzip -t OpenWorldNextGen-Source.zip
+
+      - name: Upload source ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenWorldNextGen-Source
+          path: OpenWorldNextGen-Source.zip
+          if-no-files-found: error
+          retention-days: 7
