@@ -82,9 +82,8 @@ void AOWVehiclePawn::Tick(float DeltaSeconds)
 
     if (bBrakePressed && !Velocity.IsNearlyZero())
     {
-        const float BrakeScale = FMath::Min(
-            1.0f, MaximumBrakeForce / FMath::Max(1.0f, Velocity.Size() * 1000.0f));
-        Chassis->AddForce(-Velocity.GetSafeNormal() * MaximumBrakeForce * BrakeScale);
+        const float BrakeMagnitude = FMath::Min(MaximumBrakeForce, Velocity.Size() * 12000.0f);
+        Chassis->AddForce(-Velocity.GetSafeNormal() * BrakeMagnitude);
     }
 
     const float SpeedFactor = FMath::Clamp(FMath::Abs(ForwardSpeed) / 500.0f, 0.0f, 1.0f);
@@ -92,7 +91,7 @@ void AOWVehiclePawn::Tick(float DeltaSeconds)
     {
         const float ReverseSign = ForwardSpeed < -10.0f ? -1.0f : 1.0f;
         Chassis->AddTorqueInRadians(
-            FVector::UpVector * SteeringInput * MaximumSteeringTorque * SpeedFactor * ReverseSign);
+            Chassis->GetUpVector() * SteeringInput * MaximumSteeringTorque * SpeedFactor * ReverseSign);
     }
 }
 
