@@ -113,6 +113,9 @@ def main() -> int:
             "District dimensions must also be clamped at runtime.")
     require("RandomStream.RandRange(3, 5)" in city_map_source and "RandomStream.FRandRange" in city_map_source,
             "Building count and dimensions must use the seeded district random stream.")
+    require("const float CellScale = CellSize / 18000.0f" in city_map_source and
+            "const float RowSpacing = CellSize * 0.5f" in city_map_source,
+            "Building placement and dimensions must scale with the configured cell size.")
 
     require("Component->SetCollisionEnabled(ECollisionEnabled::NoCollision)" in city_map_source,
             "Decorative props should not add unnecessary physics collision.")
