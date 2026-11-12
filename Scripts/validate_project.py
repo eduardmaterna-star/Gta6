@@ -128,6 +128,31 @@ def main() -> int:
     require("\"NavigationSystem\"" in (ROOT / "Source/OpenWorldNextGen/OpenWorldNextGen.Build.cs").read_text(encoding="utf-8"),
             "NavigationSystem dependency is required by the civilian prototype.")
 
+    save_header = (ROOT / "Source/OpenWorldNextGen/Persistence/OWSaveGame.h").read_text(encoding="utf-8")
+    persistence_header = (ROOT / "Source/OpenWorldNextGen/Persistence/OWPersistenceSubsystem.h").read_text(encoding="utf-8")
+    persistence_source = (ROOT / "Source/OpenWorldNextGen/Persistence/OWPersistenceSubsystem.cpp").read_text(encoding="utf-8")
+    require("CurrentSchemaVersion = 1" in save_header and "UPROPERTY(VisibleAnywhere, SaveGame" in save_header,
+            "SaveGame data must expose an explicit serialized schema.")
+    for field in ("MapIdentifier", "PlayerTransform", "SelectedCharacterId", "SavedAtUtc"):
+        require(field in save_header, f"Save schema is missing required field: {field}")
+    for method in ("SaveCurrentGame", "LoadCurrentGame", "HasSaveGame"):
+        require(method in persistence_header, f"Persistence subsystem API is missing: {method}")
+    require("UGameInstanceSubsystem" in persistence_header and
+            "CreateSaveGameObject" in persistence_source and "SaveGameToSlot" in persistence_source,
+            "Persistence must use a dedicated game-instance service and Unreal SaveGame slots.")
+    require("Unsupported save schema version" in persistence_source and
+            "IsValidPlayerTransform" in persistence_source and "FMath::IsFinite" in persistence_source,
+            "Save payload must reject unsupported schemas and non-finite transforms.")
+    require("TryLoadValidatedSlot" in persistence_source and "BackupSlotSuffix" in persistence_source,
+            "Save loading must validate primary and backup slots before applying state.")
+    require("SetActorTransform" in persistence_source and
+            persistence_source.find("TryLoadValidatedSlot(SaveSlotName + BackupSlotSuffix") <
+            persistence_source.find("SetActorTransform"),
+            "Player state must only be applied after validated primary/backup loading.")
+    require("SaveGameToSlot(ExistingSave, BackupSlot" in persistence_source and
+            "Cannot preserve the previous save" in persistence_source,
+            "Replacing a valid primary save must preserve it in the backup slot first.")
+
     city_map_header = (ROOT / "Source/OpenWorldNextGen/World/OWCityMap.h").read_text(encoding="utf-8")
     require("GenerationSeed" in city_map_header and "FRandomStream RandomStream(GenerationSeed)" in city_map_source,
             "District generation must use an explicit reproducible seed.")
@@ -148,6 +173,7 @@ def main() -> int:
             "Decorative props should not add unnecessary physics collision.")
 
     print("Static project validation passed.")
+    print("Save/load schema and recovery source checks passed.")
     print("Civilian NavMesh wandering source checks passed.")
     print("PlayerStart initialization order checks passed.")
     print("Note: UnrealHeaderTool, MSVC compilation, editor launch and packaged-game tests were not run.")
