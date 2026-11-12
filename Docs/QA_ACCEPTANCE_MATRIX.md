@@ -45,9 +45,16 @@ This matrix is the minimum evidence required before marking a feature complete. 
 - Packaged Development tests must prove restart persistence, corrupt/truncated slot recovery, backup fallback and unchanged world state after failed load.
 - Unreal Automation tests and future schema migration tests remain required before issue #7 can close.
 
-### Vehicles, police, gangs and missions (when implemented)
-- Each system has explicit state transitions, invalid-input handling and cancellation/cleanup behavior.
-- Tests cover normal, boundary, failure and repeated-trigger scenarios.
+### Vehicle (source prototype implemented; engine/runtime acceptance pending)
+- Vehicle pawn has a physics-simulated chassis, bounded throttle/steering input, braking and a follow camera.
+- Entry stores the previous pawn and hands possession to the vehicle; exit checks for a safe teleport spot before restoring possession.
+- Reset clears linear and angular velocity only when a valid physics body/world exists and the reset location is not blocked.
+- UE 5.8 build and PIE tests must cover enter/exit/re-enter, blocked exit, collision, rollover/reset and level unload.
+- Physics stability and performance must be measured at controlled speeds and frame rates. The current prototype is arcade rigid-body handling, not a wheel/suspension vehicle.
+
+### Traffic, police, gangs and missions (not implemented)
+- Each system requires explicit state transitions, invalid-input handling and cancellation/cleanup behavior.
+- Tests must cover normal, boundary, failure and repeated-trigger scenarios.
 - Cross-system events cannot create duplicate pursuits, missions or faction changes.
 - No feature is marked complete based only on an empty class, placeholder mesh or documentation.
 
