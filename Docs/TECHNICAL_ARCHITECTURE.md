@@ -80,13 +80,14 @@ Implemented in source:
 - timer-driven civilian wandering prototype using AIController and NavMesh queries;
 - bounded civilian population spawner source with seeded candidate sampling, NavMesh projection/path checks, collision-safe spawning and owned-actor cleanup;
 - versioned SaveGame data schema and game-instance persistence subsystem with map/transform validation and primary/backup slots;
+- first arcade-physics vehicle pawn source with entry/exit possession handoff, camera, bounded controls and explicit reset;
 - static repository validation and installer-source validation.
 
 Not implemented or not verified:
 - real editor-authored World Partition map;
 - editor-authored test map with configured NavMesh and runtime-verified civilian population spawner;
 - UnrealHeaderTool/MSVC build and packaged runtime verification of the new save/load source;
-- vehicles and traffic;
+- production wheel/suspension vehicle physics, road graph and traffic agents;
 - police and gangs;
 - mission framework and branching story;
 - three playable characters;
