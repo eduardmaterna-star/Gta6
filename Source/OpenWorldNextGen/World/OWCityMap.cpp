@@ -7,9 +7,7 @@
 
 namespace
 {
-    constexpr float CellSize = 18000.0f; // 180 metres
     constexpr float RoadWidth = 1400.0f;
-    constexpr int32 CellCount = 6;
 }
 
 AOWCityMap::AOWCityMap()
@@ -77,6 +75,10 @@ void AOWCityMap::AddBox(UInstancedStaticMeshComponent* Component, const FVector&
 
 void AOWCityMap::BuildDistrict()
 {
+    // Clamp again at runtime: editor metadata improves UX but is not a runtime safety boundary.
+    const int32 CellCount = FMath::Clamp(DistrictCellCount, 2, 12);
+    const float CellSize = FMath::Clamp(DistrictCellSize, 8000.0f, 30000.0f);
+
     if (!Ground || !Roads || !Sidewalks || !Buildings || !StreetFurniture || !ParkProps || !Ground->GetStaticMesh())
     {
         UE_LOG(LogTemp, Error, TEXT("OWCityMap: basic cube mesh is unavailable; district generation skipped."));
