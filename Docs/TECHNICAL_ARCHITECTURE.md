@@ -78,11 +78,12 @@ Implemented in source:
 - line-trace interaction interface dispatch;
 - runtime-generated greybox district using instanced cube meshes;
 - timer-driven civilian wandering prototype using AIController and NavMesh queries;
+- bounded civilian population spawner source with seeded candidate sampling, NavMesh projection/path checks, collision-safe spawning and owned-actor cleanup;
 - static repository validation and installer-source validation.
 
 Not implemented or not verified:
 - real editor-authored World Partition map;
-- configured NavMesh and automatic civilian population;
+- editor-authored test map with configured NavMesh and runtime-verified civilian population spawner;
 - save/load;
 - vehicles and traffic;
 - police and gangs;
