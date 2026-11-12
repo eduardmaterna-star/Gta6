@@ -41,6 +41,13 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Map|Generation")
     int32 GenerationSeed = 20261111;
 
+    // Keep runtime greybox generation bounded until the map is migrated to streamed editor-authored cells.
+    UPROPERTY(EditDefaultsOnly, Category = "Map|Generation", meta = (ClampMin = "2", ClampMax = "12"))
+    int32 DistrictCellCount = 6;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Map|Generation", meta = (ClampMin = "8000.0", ClampMax = "30000.0", Units = "cm"))
+    float DistrictCellSize = 18000.0f;
+
     void BuildDistrict();
     void AddBox(UInstancedStaticMeshComponent* Component, const FVector& Center, const FVector& Size) const;
 };
