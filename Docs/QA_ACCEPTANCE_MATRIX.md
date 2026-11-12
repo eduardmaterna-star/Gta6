@@ -35,6 +35,7 @@ This matrix is the minimum evidence required before marking a feature complete. 
 - It selects reachable points, moves, stops, and retries when navigation is unavailable.
 - Timers are cleared and movement stops when the actor is destroyed or the level unloads.
 - A population test verifies the configured cap and records CPU/memory/path request rates.
+- The spawner uses bounded location attempts, validates a path from its origin, staggers spawns, and cleans up all owned civilians on EndPlay.
 
 ### Save/load (when implemented)
 - Save survives application restart.
@@ -50,7 +51,7 @@ This matrix is the minimum evidence required before marking a feature complete. 
 
 ## Current verification status (2026-11-12)
 
-- Repository static validation: previously passed on an earlier commit; rerun is required after source changes.
+- Repository static validation: pending for the current civilian population implementation commit.
 - Installer source validation: previously passed on an earlier commit; it only checks source configuration.
 - Unreal C++ compilation: not run in this environment.
 - Unreal Editor/runtime tests: not run.
