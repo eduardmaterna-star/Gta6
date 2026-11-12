@@ -39,8 +39,21 @@ void AOWGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (GetWorld())
+    UWorld* World = GetWorld();
+    if (!World)
     {
-        GetWorld()->SpawnActor<AOWCityMap>(AOWCityMap::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+        UE_LOG(LogTemp, Error, TEXT("OWGameMode: world is unavailable; city map was not spawned."));
+        return;
+    }
+
+    // Allow an editor-authored city map to take precedence and prevent duplicate runtime geometry.
+    for (TActorIterator<AOWCityMap> It(World); It; ++It)
+    {
+        return;
+    }
+
+    if (!World->SpawnActor<AOWCityMap>(AOWCityMap::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator))
+    {
+        UE_LOG(LogTemp, Error, TEXT("OWGameMode: failed to spawn the fallback city map."));
     }
 }
