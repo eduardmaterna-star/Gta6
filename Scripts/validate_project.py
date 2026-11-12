@@ -41,6 +41,8 @@ def main() -> int:
         "Source/OpenWorldNextGen/Player/OWPlayerCharacter.cpp",
         "Source/OpenWorldNextGen/World/OWCityMap.cpp",
         "Source/OpenWorldNextGen/AI/OWCivilianCharacter.cpp",
+        "Source/OpenWorldNextGen/AI/OWCivilianPopulationSpawner.h",
+        "Source/OpenWorldNextGen/AI/OWCivilianPopulationSpawner.cpp",
     )
     for relative in required_sources:
         require((ROOT / relative).is_file(), f"Missing required source: {relative}")
@@ -99,6 +101,27 @@ def main() -> int:
             "Civilian prototype should remain timer-driven without an unnecessary per-frame tick.")
     require("ClearTimer(WanderTimerHandle)" in civilian_source,
             "Civilian timer must be cleared on EndPlay.")
+
+    population_header = (ROOT / "Source/OpenWorldNextGen/AI/OWCivilianPopulationSpawner.h").read_text(encoding="utf-8")
+    population_source = (ROOT / "Source/OpenWorldNextGen/AI/OWCivilianPopulationSpawner.cpp").read_text(encoding="utf-8")
+    require("MaxPopulation = 12" in population_header and 'ClampMax = "50"' in population_header,
+            "Civilian population must have a conservative, editor-configurable hard cap.")
+    require("FMath::Clamp(MaxPopulation, 0, 50)" in population_source,
+            "Civilian population cap must also be enforced at runtime.")
+    require("MaxLocationAttemptsPerSpawn" in population_header and "FMath::Clamp(MaxLocationAttemptsPerSpawn, 1, 12)" in population_source,
+            "Civilian spawn location queries must have a bounded retry count.")
+    require("RandomStream.Initialize(RandomSeed)" in population_source and "RandomStream.FRandRange" in population_source,
+            "Civilian spawn candidate sampling must use a configurable deterministic seed.")
+    require("ProjectPointToNavigation" in population_source and "GetPathLength" in population_source,
+            "Civilian spawn points must be projected onto NavMesh and checked for a connecting path.")
+    require("SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding" in population_source,
+            "Civilian spawning must not force actors into overlapping collision.")
+    require("ScheduleNextSpawn(RetryInterval)" in population_source,
+            "Failed civilian spawn attempts must use a delayed retry.")
+    require("ClearTimer(SpawnTimerHandle)" in population_source and "Civilian->Destroy()" in population_source,
+            "Population spawner must clear its timer and clean up owned civilians on EndPlay.")
+    require("PrimaryActorTick.bCanEverTick = false" in population_source,
+            "Population spawner must remain timer-driven without an unnecessary per-frame tick.")
 
     require("\"AIModule\"" in (ROOT / "Source/OpenWorldNextGen/OpenWorldNextGen.Build.cs").read_text(encoding="utf-8"),
             "AIModule dependency is required by the civilian prototype.")
