@@ -54,3 +54,12 @@ compilation and in-editor behavior still require UE 5.8 on Windows.
 ## Reproducible greybox variation
 
 The runtime district now exposes an editor-default `GenerationSeed`. Building counts and dimensions are generated from one `FRandomStream` initialized with that seed, so a given seed produces a repeatable layout while changing the seed produces a different blockout. This remains a small single-actor greybox generator; it is not World Partition, a road graph, or a production city-generation system.
+
+
+## Configurable greybox footprint
+
+The runtime greybox now exposes `DistrictCellCount` and `DistrictCellSize` as editor defaults.
+The cell count is clamped to 2–12 and the cell size to 80–300 metres, both in editor metadata
+and again at runtime. This allows controlled prototype-size experiments while keeping the
+single-actor generator bounded. It does not provide world streaming or production-scale city
+generation; larger worlds still require editor-authored World Partition cells and profiling.
