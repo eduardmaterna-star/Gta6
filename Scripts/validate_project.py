@@ -43,6 +43,8 @@ def main() -> int:
         "Source/OpenWorldNextGen/AI/OWCivilianCharacter.cpp",
         "Source/OpenWorldNextGen/AI/OWCivilianPopulationSpawner.h",
         "Source/OpenWorldNextGen/AI/OWCivilianPopulationSpawner.cpp",
+        "Source/OpenWorldNextGen/Vehicles/OWVehiclePawn.h",
+        "Source/OpenWorldNextGen/Vehicles/OWVehiclePawn.cpp",
     )
     for relative in required_sources:
         require((ROOT / relative).is_file(), f"Missing required source: {relative}")
@@ -152,6 +154,25 @@ def main() -> int:
     require("SaveGameToSlot(ExistingSave, BackupSlot" in persistence_source and
             "Cannot preserve the previous save" in persistence_source,
             "Replacing a valid primary save must preserve it in the backup slot first.")
+
+
+    vehicle_header = (ROOT / "Source/OpenWorldNextGen/Vehicles/OWVehiclePawn.h").read_text(encoding="utf-8")
+    vehicle_source = (ROOT / "Source/OpenWorldNextGen/Vehicles/OWVehiclePawn.cpp").read_text(encoding="utf-8")
+    for token in ("IOWInteractable", "Interact_Implementation", "SetupPlayerInputComponent", "ResetVehicle"):
+        require(token in vehicle_header, f"Vehicle pawn is missing required interface/API: {token}")
+    for token in ("SetSimulatePhysics(true)", "SetMassOverrideInKg", "AddForce", "AddTorqueInRadians",
+                  "FindTeleportSpot", "Possess(this)", "Possess(PawnToRestore)"):
+        require(token in vehicle_source, f"Vehicle source is missing physics/possession safety behavior: {token}")
+    require("PreviousPawn" in vehicle_header and "PreviousPawn.Reset()" in vehicle_source,
+            "Vehicle must track and release the previous player pawn safely.")
+    require("FMath::Clamp(Value, -1.0f, 1.0f)" in vehicle_source and
+            "MaximumSpeedCmPerSecond" in vehicle_source,
+            "Vehicle input and top-speed controls must be bounded.")
+    vehicle_input = (ROOT / "Config/DefaultInput.ini").read_text(encoding="utf-8")
+    for mapping in ("VehicleThrottle", "VehicleSteer", "VehicleBrake"):
+        require(mapping in vehicle_input, f"Missing vehicle input mapping: {mapping}")
+    require("ResetVehicle" in (ROOT / "Docs/VEHICLE_PROTOTYPE_SETUP.md").read_text(encoding="utf-8"),
+            "Vehicle setup and recovery documentation is missing.")
 
     city_map_header = (ROOT / "Source/OpenWorldNextGen/World/OWCityMap.h").read_text(encoding="utf-8")
     require("GenerationSeed" in city_map_header and "FRandomStream RandomStream(GenerationSeed)" in city_map_source,
