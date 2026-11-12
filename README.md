@@ -40,3 +40,8 @@ Podrobnosti: Docs/WINDOWS_BUILD_AND_TEST.md.
 GitHub Actions ověřuje kompilaci Inno Setup instalačního skriptu s testovacím souborem. To nenahrazuje kompilaci Unreal Engine ani test instalace skutečné hry.
 
 V tomto prostředí nebyl dostupný Unreal Editor, MSVC ani Windows .NET SDK. Kompilace, spuštění, herní testy, instalace a velikost výsledného instalátoru proto nejsou potvrzené.
+
+
+## Save/load development
+
+See [save/load setup and verification requirements](Docs/SAVE_LOAD_SETUP.md) for the initial versioned persistence slice and its remaining UE 5.8 runtime tests.
