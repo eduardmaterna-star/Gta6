@@ -104,6 +104,13 @@ def main() -> int:
     city_map_header = (ROOT / "Source/OpenWorldNextGen/World/OWCityMap.h").read_text(encoding="utf-8")
     require("GenerationSeed" in city_map_header and "FRandomStream RandomStream(GenerationSeed)" in city_map_source,
             "District generation must use an explicit reproducible seed.")
+    require("DistrictCellCount" in city_map_header and "DistrictCellSize" in city_map_header,
+            "District dimensions must be configurable from the editor.")
+    require('ClampMin = "2", ClampMax = "12"' in city_map_header and 'ClampMin = "8000.0", ClampMax = "30000.0"' in city_map_header,
+            "Editor-facing district dimensions must have conservative limits.")
+    require("FMath::Clamp(DistrictCellCount, 2, 12)" in city_map_source and
+            "FMath::Clamp(DistrictCellSize, 8000.0f, 30000.0f)" in city_map_source,
+            "District dimensions must also be clamped at runtime.")
     require("RandomStream.RandRange(3, 5)" in city_map_source and "RandomStream.FRandRange" in city_map_source,
             "Building count and dimensions must use the seeded district random stream.")
 
