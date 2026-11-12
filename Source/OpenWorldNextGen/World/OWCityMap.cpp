@@ -134,11 +134,15 @@ void AOWCityMap::BuildDistrict()
 
             for (int32 BuildingIndex = 0; BuildingIndex < BuildingCount; ++BuildingIndex)
             {
-                const float Width = RandomStream.FRandRange(2200.0f, 3500.0f);
-                const float Depth = RandomStream.FRandRange(2200.0f, 3500.0f);
+                const float CellScale = CellSize / 18000.0f;
+                const float Width = RandomStream.FRandRange(2200.0f, 3500.0f) * CellScale;
+                const float Depth = RandomStream.FRandRange(2200.0f, 3500.0f) * CellScale;
                 const float Height = RandomStream.FRandRange(900.0f, 4800.0f);
-                const float LocalX = ((BuildingIndex % 2) == 0 ? -1.0f : 1.0f) * 3900.0f;
-                const float LocalY = ((BuildingIndex / 2) - 0.5f) * 5000.0f;
+                const int32 RowCount = (BuildingCount + 1) / 2;
+                const int32 RowIndex = BuildingIndex / 2;
+                const float RowSpacing = CellSize * 0.5f / FMath::Max(1, RowCount - 1);
+                const float LocalX = ((BuildingIndex % 2) == 0 ? -1.0f : 1.0f) * CellSize * 0.22f;
+                const float LocalY = (RowIndex - (RowCount - 1) * 0.5f) * RowSpacing;
                 AddBox(Buildings, FVector(BlockCenterX + LocalX, BlockCenterY + LocalY, Height * 0.5f + 70.0f), FVector(Width, Depth, Height));
             }
         }
