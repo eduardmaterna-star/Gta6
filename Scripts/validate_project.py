@@ -165,6 +165,8 @@ def main() -> int:
         require(token in vehicle_source, f"Vehicle source is missing physics/possession safety behavior: {token}")
     require("PreviousPawn" in vehicle_header and "PreviousPawn.Reset()" in vehicle_source,
             "Vehicle must track and release the previous player pawn safely.")
+    require("if (!PawnToRestore->SetActorLocationAndRotation" in vehicle_source,
+            "Vehicle exit must only restore possession after successful collision-safe relocation.")
     require("FMath::Clamp(Value, -1.0f, 1.0f)" in vehicle_source and
             "MaximumSpeedCmPerSecond" in vehicle_source,
             "Vehicle input and top-speed controls must be bounded.")
