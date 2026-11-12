@@ -142,8 +142,12 @@ void AOWVehiclePawn::ExitVehicle()
         return;
     }
 
-    PawnToRestore->SetActorLocationAndRotation(ExitLocation, ExitRotation, false, nullptr,
-                                                ETeleportType::TeleportPhysics);
+    if (!PawnToRestore->SetActorLocationAndRotation(ExitLocation, ExitRotation, false, nullptr,
+                                                     ETeleportType::TeleportPhysics))
+    {
+        return;
+    }
+
     PlayerController->Possess(PawnToRestore);
     PreviousPawn.Reset();
     ThrottleInput = 0.0f;
