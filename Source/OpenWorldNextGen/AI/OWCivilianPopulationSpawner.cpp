@@ -140,8 +140,12 @@ void AOWCivilianPopulationSpawner::SpawnNextCivilian()
 {
     PruneInvalidCivilians();
 
-    if (SpawnedCivilians.Num() >= FMath::Clamp(MaxPopulation, 0, 50))
+    const int32 PopulationLimit = FMath::Clamp(MaxPopulation, 0, 50);
+    if (SpawnedCivilians.Num() >= PopulationLimit)
     {
+        // Keep a low-frequency maintenance check active so externally removed
+        // civilians are replaced instead of leaving the population permanently low.
+        ScheduleNextSpawn(RetryInterval);
         return;
     }
 
@@ -198,8 +202,14 @@ void AOWCivilianPopulationSpawner::SpawnNextCivilian()
     SpawnedCivilians.Add(SpawnedCivilian);
 
     // Spawn gradually to avoid a single-frame burst of actor creation and path queries.
-    if (SpawnedCivilians.Num() < FMath::Clamp(MaxPopulation, 0, 50))
+    if (SpawnedCivilians.Num() < PopulationLimit)
     {
         ScheduleNextSpawn(SpawnInterval);
+    }
+    else
+    {
+        // Recheck the cap periodically; PruneInvalidCivilians runs before the
+        // next decision and will make room for replacement spawns.
+        ScheduleNextSpawn(RetryInterval);
     }
 }
