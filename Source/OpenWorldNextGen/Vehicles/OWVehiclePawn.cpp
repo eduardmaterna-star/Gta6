@@ -114,7 +114,8 @@ void AOWVehiclePawn::Interact_Implementation(AActor* InteractingActor)
         ? Cast<APlayerController>(EnteringPawn->GetController()) : nullptr;
 
     if (!IsValid(EnteringPawn) || !IsValid(PlayerController) ||
-        !Chassis || !Chassis->IsSimulatingPhysics() || PlayerController->GetPawn() != EnteringPawn)
+        PlayerController->GetPawn() != EnteringPawn || PreviousPawn.IsValid() ||
+        !Chassis || !Chassis->IsSimulatingPhysics())
     {
         return;
     }
@@ -123,7 +124,14 @@ void AOWVehiclePawn::Interact_Implementation(AActor* InteractingActor)
     ThrottleInput = 0.0f;
     SteeringInput = 0.0f;
     bBrakePressed = false;
+
     PlayerController->Possess(this);
+    if (PlayerController->GetPawn() != this)
+    {
+        // Keep the original pawn in control if the possession handoff was rejected.
+        PreviousPawn.Reset();
+        UE_LOG(LogTemp, Warning, TEXT("OWVehiclePawn: player possession handoff to vehicle failed."));
+    }
 }
 
 void AOWVehiclePawn::ExitVehicle()
@@ -149,6 +157,13 @@ void AOWVehiclePawn::ExitVehicle()
     }
 
     PlayerController->Possess(PawnToRestore);
+    if (PlayerController->GetPawn() != PawnToRestore)
+    {
+        // Preserve PreviousPawn so the handoff can be retried instead of losing the reference.
+        UE_LOG(LogTemp, Error, TEXT("OWVehiclePawn: player possession handoff back to character failed."));
+        return;
+    }
+
     PreviousPawn.Reset();
     ThrottleInput = 0.0f;
     SteeringInput = 0.0f;
