@@ -23,9 +23,10 @@ The repository does not contain an editor-authored test map yet. To exercise thi
 4. Place one `AOWCivilianPopulationSpawner` actor on the test floor.
 5. Keep the default cap at 12 for the first smoke test; then test 0, 1, 12 and a higher configured cap.
 6. Play in Editor and verify civilians spawn gradually, move, never exceed the configured cap, and are removed when the spawner/level ends.
-7. Move the spawner slightly above/below the floor (within the projection extent) and verify candidates still spawn from the projected NavMesh origin.
-8. Place the spawner outside the projection extent and verify it logs once and retries at the configured interval without spawning or entering a rapid loop.
-9. Remove or disable the NavMesh and verify the actor retries at the configured interval without a rapid loop.
+7. After the population reaches its cap, destroy one spawned civilian and verify the spawner replaces it after its maintenance retry interval without exceeding the cap.
+8. Move the spawner slightly above/below the floor (within the projection extent) and verify candidates still spawn from the projected NavMesh origin.
+9. Place the spawner outside the projection extent and verify it logs once and retries at the configured interval without spawning or entering a rapid loop.
+10. Remove or disable the NavMesh and verify the actor retries at the configured interval without a rapid loop.
 
 ## Determinism and limits
 
