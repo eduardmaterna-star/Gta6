@@ -130,6 +130,13 @@ def main() -> int:
             "Civilian spawning must not force actors into overlapping collision.")
     require("ScheduleNextSpawn(RetryInterval)" in population_source,
             "Failed civilian spawn attempts must use a delayed retry.")
+    population_cap_check = population_source.find("if (SpawnedCivilians.Num() >= PopulationLimit)")
+    population_cap_retry = population_source.find("ScheduleNextSpawn(RetryInterval)", population_cap_check)
+    require(population_cap_check >= 0 and population_cap_retry > population_cap_check,
+            "Civilian population must periodically recheck a reached cap and refill removed actors.")
+    require("PruneInvalidCivilians();" in population_source and
+            population_source.find("PruneInvalidCivilians();") < population_cap_check,
+            "Invalid civilian references must be pruned before population-cap decisions.")
     require("ClearTimer(SpawnTimerHandle)" in population_source and "Civilian->Destroy()" in population_source,
             "Population spawner must clear its timer and clean up owned civilians on EndPlay.")
     require("PrimaryActorTick.bCanEverTick = false" in population_source,
