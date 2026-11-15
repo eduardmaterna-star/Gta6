@@ -77,7 +77,25 @@ bool AOWCivilianPopulationSpawner::TryFindReachableSpawnLocation(FVector& OutLoc
 
     const float SafeRadius = FMath::Clamp(SpawnRadius, 500.0f, 10000.0f);
     const int32 Attempts = FMath::Clamp(MaxLocationAttemptsPerSpawn, 1, 12);
-    const FVector Origin = GetActorLocation();
+
+    // The actor itself may be placed slightly above/below the walkable surface.
+    // Project it first so reachability is checked from a real NavMesh location.
+    FNavLocation ProjectedOrigin;
+    if (!NavigationSystem->ProjectPointToNavigation(
+            GetActorLocation(),
+            ProjectedOrigin,
+            FVector(250.0f, 250.0f, 1000.0f)))
+    {
+        if (!bWarnedInvalidSpawnerOrigin)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Civilian population spawner: its origin cannot be projected onto NavMesh; retrying."));
+            bWarnedInvalidSpawnerOrigin = true;
+        }
+        return false;
+    }
+
+    bWarnedInvalidSpawnerOrigin = false;
+    const FVector Origin = ProjectedOrigin.Location;
 
     for (int32 Attempt = 0; Attempt < Attempts; ++Attempt)
     {
