@@ -6,7 +6,8 @@
 
 - Default cap: 12 active civilians; editable range 0–50.
 - Spawning is staggered by a timer rather than performed in one frame.
-- Candidate points use a seeded random stream, are projected onto NavMesh, and are checked for a path from the spawner.
+- The spawner actor origin is first projected onto NavMesh (250 cm horizontal and 1000 cm vertical query extent); candidate points are sampled around that projected origin.
+- Candidate points use a seeded random stream, are projected onto NavMesh, and are checked for a path from the projected spawner origin.
 - Location attempts are bounded (1–12 per spawn attempt).
 - Missing navigation, invalid class, path failure or spawn collision are recoverable and retried after a delay.
 - The spawner tracks only actors it created and destroys those actors when it ends play.
@@ -22,7 +23,9 @@ The repository does not contain an editor-authored test map yet. To exercise thi
 4. Place one `AOWCivilianPopulationSpawner` actor on the test floor.
 5. Keep the default cap at 12 for the first smoke test; then test 0, 1, 12 and a higher configured cap.
 6. Play in Editor and verify civilians spawn gradually, move, never exceed the configured cap, and are removed when the spawner/level ends.
-7. Remove or disable the NavMesh and verify the actor logs one warning and retries at the configured interval without a rapid loop.
+7. Move the spawner slightly above/below the floor (within the projection extent) and verify candidates still spawn from the projected NavMesh origin.
+8. Place the spawner outside the projection extent and verify it logs once and retries at the configured interval without spawning or entering a rapid loop.
+9. Remove or disable the NavMesh and verify the actor retries at the configured interval without a rapid loop.
 
 ## Determinism and limits
 
