@@ -167,6 +167,15 @@ def main() -> int:
             "Vehicle must track and release the previous player pawn safely.")
     require("if (!PawnToRestore->SetActorLocationAndRotation" in vehicle_source,
             "Vehicle exit must only restore possession after successful collision-safe relocation.")
+    enter_handoff = vehicle_source.find("PlayerController->Possess(this);")
+    enter_check = vehicle_source.find("if (PlayerController->GetPawn() != this)", enter_handoff)
+    require(enter_handoff >= 0 and enter_check > enter_handoff,
+            "Vehicle entry must verify that the controller actually possesses the vehicle.")
+    exit_handoff = vehicle_source.find("PlayerController->Possess(PawnToRestore);")
+    exit_check = vehicle_source.find("if (PlayerController->GetPawn() != PawnToRestore)", exit_handoff)
+    exit_release = vehicle_source.find("PreviousPawn.Reset();", exit_check)
+    require(exit_handoff >= 0 and exit_check > exit_handoff and exit_release > exit_check,
+            "Vehicle exit must verify restored possession before clearing the previous-pawn reference.")
     require("FMath::Clamp(Value, -1.0f, 1.0f)" in vehicle_source and
             "MaximumSpeedCmPerSecond" in vehicle_source,
             "Vehicle input and top-speed controls must be bounded.")
