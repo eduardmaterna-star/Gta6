@@ -161,7 +161,7 @@ function reset(){player.position.set(0,0,0);player.visible=true;car.group.positi
 function hud(){document.getElementById("loot").textContent=loot+" / 4";document.getElementById("objective").textContent=loot+" / 4";document.getElementById("cash").textContent="$"+cash.toLocaleString("en-US");document.getElementById("stars").textContent=wanted?"★".repeat(wanted)+"☆".repeat(4-wanted):"—"}
 function target(){return inCar?car.group.position:player.position}
 function distXZ(a,b){return Math.hypot(a.x-b.x,a.z-b.z)}
-function collides(x,z,r){if(interiorState)return false;if(Math.abs(x)>1020||Math.abs(z)>1020)return true;for(var i=0;i<buildings.length;i++){var b=buildings[i],nx=Math.max(b.x-b.w/2,Math.min(x,b.x+b.w/2)),nz=Math.max(b.z-b.d/2,Math.min(z,b.z+b.d/2));if((x-nx)*(x-nx)+(z-nz)*(z-nz)<r*r)return true}return false}
+function collides(x,z,r){if(interiorState){var ib=interiorState.building;return Math.abs(x-ib.x)>Math.min(26,ib.w*.32)||Math.abs(z-ib.z)>Math.min(22,ib.d*.32)}if(Math.abs(x)>1020||Math.abs(z)>1020)return true;for(var i=0;i<buildings.length;i++){var b=buildings[i],nx=Math.max(b.x-b.w/2,Math.min(x,b.x+b.w/2)),nz=Math.max(b.z-b.d/2,Math.min(z,b.z+b.d/2));if((x-nx)*(x-nx)+(z-nz)*(z-nz)<r*r)return true}return false}
 function movePlayer(dx,dz){var p=player.position,nx=p.x+dx,nz=p.z+dz;if(!collides(nx,p.z,1.2))p.x=nx;if(!collides(p.x,nz,1.2))p.z=nz}
 var interiorState=null;
 function makeInterior(building,index){
