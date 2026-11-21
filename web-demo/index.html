@@ -98,6 +98,20 @@ for(var gz=0;gz<6;gz++)for(var gx=0;gx<6;gx++){
    win.scale.set(face<2?9:9,7,1);scene.add(win);
   }
  }
+ var trimMat=new THREE.MeshStandardMaterial({color:0x8c817c,metalness:.22,roughness:.65});
+ // Facade pilasters, floor ledges, rooftop vents and a glazed street-level lobby add readable city scale.
+ for(var side=0;side<4;side++){
+  var span=side<2?w:d,along=side<2?cx:cz;
+  for(var k=-1;k<=1;k+=2){
+   var px=side<2?cx+k*w*.47:cx+k*(w/2+.15),pz=side<2?cz+k*(d/2+.15):cz;
+   box(scene,px,h*.5,pz,side<2?1.1:.8,h,side<2?.8:1.1,trimMat,false,true);
+  }
+  for(var level=14;level<h;level+=22)box(scene,side===2?cx+w/2+.3:side===3?cx-w/2-.3:cx,level,side===0?cz+d/2+.3:side===1?cz-d/2-.3:cz,side<2?w+.7:.7,.35,side<2?.7:d+.7,trimMat,false,true);
+ }
+ var roofBox=box(scene,cx+w*.23,h+5,cz-d*.18,w*.2,7,d*.18,new THREE.MeshStandardMaterial({color:0x343940,roughness:.85}),false,true);
+ for(var vent=0;vent<3;vent++)box(scene,cx-w*.28+vent*3,h+2,cz-d*.2,1.4,3,2,trimMat,false,true);
+ var lobbyGlass=new THREE.MeshStandardMaterial({color:0x27434b,metalness:.48,roughness:.22,emissive:0x10242a,emissiveIntensity:.35});
+ box(scene,cx,4,cz+d/2+.16,w*.42,7,.22,lobbyGlass,false,false);
  if((gx+gz)%3===0){
   var signMat=new THREE.MeshStandardMaterial({color:0xff7d9c,emissive:0xf03d78,emissiveIntensity:2.3,roughness:.4});
   box(scene,cx,h*.68,cz+d/2+1,w*.45,3,.7,signMat,false,false);
@@ -196,7 +210,7 @@ function endGame(win){active=false;finished=win;arrested=!win;overlay.hidden=fal
 function updateCar(dt,vehicle,playerVehicle){
  var g=vehicle.group;
  if(playerVehicle){
-  var throttle=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),steer=(keys.KeyA||keys.ArrowLeft?1:0)-(keys.KeyD||keys.ArrowRight?1:0);
+  var throttle=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),steer=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
   vehicle.velocity+=throttle*34*dt;var drifting=!!keys.ShiftLeft||!!keys.ShiftRight;
   vehicle.velocity*=Math.pow(keys.Space ? 0.91 : (drifting?0.994:0.986),dt*60);vehicle.velocity=Math.max(-12,Math.min(48,vehicle.velocity));
   g.rotation.y+=steer*(.8+Math.min(Math.abs(vehicle.velocity)/25,1))*(drifting?1.45:1)*dt*(vehicle.velocity<0?-1:1);
@@ -219,7 +233,7 @@ function update(dt){
  var r=!!keys.KeyR;if(r&&!prevR&&inCar){car.group.position.set(0,0,-9);car.group.rotation.y=Math.PI;car.velocity=0}prevR=r;
  if(inCar)updateCar(dt,car,true);
  else{
-  var mx=(keys.KeyA||keys.ArrowLeft?1:0)-(keys.KeyD||keys.ArrowRight?1:0),mz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0),len=Math.hypot(mx,mz);
+  var mx=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),mz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0),len=Math.hypot(mx,mz);
   if(len){mx/=len;mz/=len;var fX=Math.sin(cameraYaw),fZ=-Math.cos(cameraYaw),rX=Math.cos(cameraYaw),rZ=Math.sin(cameraYaw),dx=(fX*(-mz)+rX*mx)*18*dt,dz=(fZ*(-mz)+rZ*mx)*18*dt;movePlayer(dx,dz);player.rotation.y=Math.atan2(dx,dz);legs[0].rotation.x=Math.sin(clock*11)*.5;legs[1].rotation.x=-legs[0].rotation.x}
   else{legs[0].rotation.x*=.75;legs[1].rotation.x*=.75}
  }
