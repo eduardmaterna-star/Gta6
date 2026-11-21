@@ -83,7 +83,7 @@ var facadeGeometry=new THREE.PlaneGeometry(1,1);
 for(var gz=0;gz<6;gz++)for(var gx=0;gx<6;gx++){
  var cx=-750+gx*300,cz=-750+gz*300,w=120+rand()*65,d=115+rand()*65,h=45+rand()*125;
  var baseMat=new THREE.MeshStandardMaterial({color:buildingMats[Math.floor(rand()*buildingMats.length)],roughness:.86});
- var b=box(scene,cx,h/2,cz,w,h,d,baseMat,true,true);buildingRects.push({x:cx,z:cz,w:w,d:d});
+ var b=box(scene,cx,h/2,cz,w,h,d,baseMat,true,true);buildingRects.push({x:cx,z:cz,w:w,d:d,mesh:b});
  box(scene,cx,h+1.2,cz,w+2,2,d+2,new THREE.MeshStandardMaterial({color:0x292832,roughness:.8}),false,true);
  var cols=Math.max(2,Math.floor(w/18)),floors=Math.max(3,Math.floor(h/14));
  for(var face=0;face<4;face++){
@@ -161,10 +161,36 @@ function reset(){player.position.set(0,0,0);player.visible=true;car.group.positi
 function hud(){document.getElementById("loot").textContent=loot+" / 4";document.getElementById("objective").textContent=loot+" / 4";document.getElementById("cash").textContent="$"+cash.toLocaleString("en-US");document.getElementById("stars").textContent=wanted?"★".repeat(wanted)+"☆".repeat(4-wanted):"—"}
 function target(){return inCar?car.group.position:player.position}
 function distXZ(a,b){return Math.hypot(a.x-b.x,a.z-b.z)}
-function collides(x,z,r){if(Math.abs(x)>1020||Math.abs(z)>1020)return true;for(var i=0;i<buildings.length;i++){var b=buildings[i],nx=Math.max(b.x-b.w/2,Math.min(x,b.x+b.w/2)),nz=Math.max(b.z-b.d/2,Math.min(z,b.z+b.d/2));if((x-nx)*(x-nx)+(z-nz)*(z-nz)<r*r)return true}return false}
+function collides(x,z,r){if(interiorState)return false;if(Math.abs(x)>1020||Math.abs(z)>1020)return true;for(var i=0;i<buildings.length;i++){var b=buildings[i],nx=Math.max(b.x-b.w/2,Math.min(x,b.x+b.w/2)),nz=Math.max(b.z-b.d/2,Math.min(z,b.z+b.d/2));if((x-nx)*(x-nx)+(z-nz)*(z-nz)<r*r)return true}return false}
 function movePlayer(dx,dz){var p=player.position,nx=p.x+dx,nz=p.z+dz;if(!collides(nx,p.z,1.2))p.x=nx;if(!collides(p.x,nz,1.2))p.z=nz}
-function interact(){if(inCar){var heading=car.group.rotation.y;var sx=car.group.position.x+Math.cos(heading)*5.5,sz=car.group.position.z-Math.sin(heading)*5.5;if(collides(sx,sz,1.4)){sx=car.group.position.x-Math.cos(heading)*5.5;sz=car.group.position.z+Math.sin(heading)*5.5}player.position.set(sx,0,sz);player.visible=true;inCar=false;return}
- if(distXZ(player.position,car.group.position)<9){inCar=true;player.visible=false;document.getElementById("toast").textContent="Za volantem — vyraz!"}}
+var interiorState=null;
+function makeInterior(building,index){
+ var g=new THREE.Group(),w=Math.min(56,building.w*.65),d=Math.min(48,building.d*.65),wallH=8;
+ var palettes=[[0x6c4638,0x345d56,0xc8a875],[0x343b50,0x9b6b4f,0xd5c49b],[0x5a5047,0x4d6171,0xb89c77],[0x3f574b,0x805c4b,0xd7c39b]];
+ var p=palettes[index%palettes.length],wall=new THREE.MeshStandardMaterial({color:p[0],roughness:.82}),floorMat=new THREE.MeshStandardMaterial({color:p[2],roughness:.9}),wood=new THREE.MeshStandardMaterial({color:p[1],roughness:.72}),fabric=new THREE.MeshStandardMaterial({color:p[1],roughness:1}),trim=new THREE.MeshStandardMaterial({color:0xd3b77b,metalness:.25,roughness:.4});
+ box(g,0,.05,0,w,.2,d,floorMat,false,true);
+ box(g,0,wallH/2,-d/2,w,wallH,.35,wall,true,true);box(g,-w/2,wallH/2,0,.35,wallH,d,wall,true,true);box(g,w/2,wallH/2,0,.35,wallH,d,wall,true,true);
+ box(g,-w*.32,wallH/2,d/2,w*.36,wallH,.35,wall,true,true);box(g,w*.32,wallH/2,d/2,w*.36,wallH,.35,wall,true,true);
+ box(g,0,wallH-.18,0,w,.36,d,new THREE.MeshStandardMaterial({color:0x252a30,roughness:.9}),false,false);
+ // Built-in cabinets, bed, sofa, coffee table, desk and a differently colored rug.
+ box(g,-w*.28,1.35,-d*.34,w*.32,2.7,1.5,wood,true,true);box(g,-w*.28,2.8,-d*.34,w*.32,.16,1.6,trim,false,false);
+ box(g,w*.28,.65,-d*.28,w*.38,1.3,2.5,fabric,true,true);box(g,w*.28,1.35,-d*.28,w*.38,.22,2.5,trim,false,false);
+ box(g,0,.22,d*.03,w*.42,.15,d*.34,new THREE.MeshStandardMaterial({color:[0x5a3847,0x344454,0x63513a,0x395143][index%4],roughness:1}),false,false);
+ box(g,0,.65,d*.03,4.8,.9,2.6,wood,true,true);box(g,0,1.15,d*.03,4.3,.12,2.1,trim,false,false);
+ box(g,w*.32,.8,d*.02,3,.18,2.1,wood,true,true);box(g,w*.32,1.35,d*.02,3,.14,.25,trim,false,false);
+ // Ceiling light and a warm point light make the room readable.
+ var lamp=new THREE.Mesh(new THREE.SphereGeometry(.38,10,8),new THREE.MeshStandardMaterial({color:0xffedc0,emissive:0xffbd70,emissiveIntensity:2}));lamp.position.set(0,wallH-.65,0);g.add(lamp);
+ var light=new THREE.PointLight(0xffc985,34,42,2);light.position.set(0,wallH-1,0);g.add(light);
+ scene.add(g);return g;
+}
+function interact(){
+ if(interiorState){interiorState.building.mesh.visible=true;scene.remove(interiorState.room);player.position.copy(interiorState.outside);interiorState=null;document.getElementById("toast").textContent="Zpět na ulici";return}
+ if(inCar){var heading=car.group.rotation.y;var sx=car.group.position.x+Math.cos(heading)*5.5,sz=car.group.position.z-Math.sin(heading)*5.5;if(collides(sx,sz,1.4)){sx=car.group.position.x-Math.cos(heading)*5.5;sz=car.group.position.z+Math.sin(heading)*5.5}player.position.set(sx,0,sz);player.visible=true;inCar=false;return}
+ if(distXZ(player.position,car.group.position)<9){inCar=true;player.visible=false;document.getElementById("toast").textContent="Za volantem — vyraz!";return}
+ var nearest=null,best=1e9;
+ buildings.forEach(function(b,i){var ex=Math.max(Math.abs(player.position.x-b.x)-b.w/2,0),ez=Math.max(Math.abs(player.position.z-b.z)-b.d/2,0),gap=Math.hypot(ex,ez);if(gap<best){best=gap;nearest={building:b,index:i}}});
+ if(nearest&&best<5){var b=nearest.building;interiorState={building:b,outside:player.position.clone(),room:null};b.mesh.visible=false;interiorState.room=makeInterior(b,nearest.index);player.position.set(b.x,0,b.z+b.d*.25);player.rotation.y=Math.PI;document.getElementById("toast").textContent="Interiér "+(nearest.index+1)+" — E: zpět na ulici"}
+}
 function pause(){paused=!paused;overlay.hidden=!paused;document.getElementById("title").innerHTML=paused?"Krátká<br>pauza.":"Noc patří<br>ulicím.";document.getElementById("copy").textContent=paused?"Ulice počkají. Klikni pro pokračování.":"Palmy, neon a poslední jízda přes Vice Bay. Sebereš zásilky, uhneš hlídce a dostaneš se na výjezd?";playButton.textContent=paused?"Pokračovat":"Nastartovat hru"}
 function endGame(win){active=false;finished=win;arrested=!win;overlay.hidden=false;document.getElementById("title").innerHTML=win?"Čistý<br>únik.":"Konec<br>jízdy.";document.getElementById("copy").textContent=win?"Zásilky doručeny. Vice Bay dnes zůstává za tebou.":"Hlídka tě dostihla. Zkus znovu vyrazit ulicemi.";playButton.textContent="Hrát znovu"}
 function updateCar(dt,vehicle,playerVehicle){
@@ -197,6 +223,7 @@ function update(dt){
   if(len){mx/=len;mz/=len;var fX=Math.sin(cameraYaw),fZ=-Math.cos(cameraYaw),rX=Math.cos(cameraYaw),rZ=Math.sin(cameraYaw),dx=(fX*(-mz)+rX*mx)*18*dt,dz=(fZ*(-mz)+rZ*mx)*18*dt;movePlayer(dx,dz);player.rotation.y=Math.atan2(dx,dz);legs[0].rotation.x=Math.sin(clock*11)*.5;legs[1].rotation.x=-legs[0].rotation.x}
   else{legs[0].rotation.x*=.75;legs[1].rotation.x*=.75}
  }
+ if(interiorState){cameraUpdate(dt);return}
  var t=target();
  for(var i=0;i<pickups.length;i++){var item=pickups[i];if(!item.taken&&distXZ(t,item)<9){item.taken=true;item.group.visible=false;loot++;cash+=500;wanted=Math.min(4,wanted+1);hud();document.getElementById("toast").textContent="Zásilka zajištěna — policie je na cestě."}}
  for(var c=0;c<Math.min(wanted+1,cops.length);c++){updateCar(dt,cops[c],false);if(distXZ(target(),cops[c].group.position)<7&&(!inCar||Math.abs(car.velocity)<15))arrestT+=dt;else arrestT=Math.max(0,arrestT-dt*.6)}
