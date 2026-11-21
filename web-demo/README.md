@@ -9,7 +9,7 @@ Open `index.html` in a current desktop browser. Internet is needed to load the p
 ## Controls
 
 - **W / S**: move forward/back; accelerate/reverse in the car
-- **A / D**: move and steer right/left
+- **A / D**: move and steer left/right
 - **E**: enter/leave the nearby car or enter/exit a building
 - **Shift**: drift in the car
 - **Space**: handbrake
