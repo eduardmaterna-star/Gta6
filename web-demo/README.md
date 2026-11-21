@@ -8,8 +8,11 @@ Open `index.html` in a current desktop browser. An internet connection is needed
 
 ## Controls
 
-- **W A S D**: walk; steer and accelerate while driving
+- **W S**: walk; accelerate and reverse while driving
+- **A**: move/steer right
+- **D**: move/steer left
 - **E**: enter or leave the nearby car
+- **Shift**: drift while driving
 - **Space**: handbrake
 - **P**: pause
 - **Drag mouse**: rotate camera
