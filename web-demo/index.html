@@ -81,9 +81,9 @@ var windowWarm=new THREE.MeshStandardMaterial({color:0xffcf8c,emissive:0xff9a52,
 var windowCool=new THREE.MeshStandardMaterial({color:0x8bdaee,emissive:0x48a7c9,emissiveIntensity:.8,roughness:.4});
 var facadeGeometry=new THREE.PlaneGeometry(1,1);
 for(var gz=0;gz<6;gz++)for(var gx=0;gx<6;gx++){
- var cx=-750+gx*300,cz=-750+gz*300,w=120+rand()*65,d=115+rand()*65,h=45+rand()*125;
+ var cx=-750+gx*300,cz=-750+gz*300,w=120+rand()*65,d=115+rand()*65,h=45+rand()*125,bldg=new THREE.Group();scene.add(bldg);
  var baseMat=new THREE.MeshStandardMaterial({color:buildingMats[Math.floor(rand()*buildingMats.length)],roughness:.86});
- var b=box(scene,cx,h/2,cz,w,h,d,baseMat,true,true);buildingRects.push({x:cx,z:cz,w:w,d:d,mesh:b});
+ box(bldg,cx,h/2,cz,w,h,d,baseMat,true,true);buildingRects.push({x:cx,z:cz,w:w,d:d,mesh:bldg});
  box(scene,cx,h+1.2,cz,w+2,2,d+2,new THREE.MeshStandardMaterial({color:0x292832,roughness:.8}),false,true);
  var cols=Math.max(2,Math.floor(w/18)),floors=Math.max(3,Math.floor(h/14));
  for(var face=0;face<4;face++){
@@ -95,7 +95,7 @@ for(var gz=0;gz<6;gz++)for(var gx=0;gx<6;gx++){
    if(face===1){win.position.set(xx,yy,cz-d/2-.08);win.rotation.y=Math.PI}
    if(face===2){win.position.set(cx+w/2+.08,yy,cz-d/2+9+col*(d-18)/cols);win.rotation.y=Math.PI/2}
    if(face===3){win.position.set(cx-w/2-.08,yy,cz-d/2+9+col*(d-18)/cols);win.rotation.y=-Math.PI/2}
-   win.scale.set(face<2?9:9,7,1);scene.add(win);
+   win.scale.set(face<2?9:9,7,1);bldg.add(win);
   }
  }
  var trimMat=new THREE.MeshStandardMaterial({color:0x8c817c,metalness:.22,roughness:.65});
@@ -198,12 +198,12 @@ function makeInterior(building,index){
  g.position.set(building.x,0,building.z);scene.add(g);return g;
 }
 function interact(){
- if(interiorState){interiorState.building.mesh.visible=true;scene.remove(interiorState.room);player.position.copy(interiorState.outside);interiorState=null;document.getElementById("toast").textContent="Zpět na ulici";return}
+ if(interiorState){interiorState.building.mesh.visible=true;scene.remove(interiorState.room);interiorState.room.traverse(function(obj){if(obj.isMesh){obj.geometry.dispose();if(Array.isArray(obj.material))obj.material.forEach(function(m){m.dispose()});else if(obj.material)obj.material.dispose()}else if(obj.isLight&&obj.dispose)obj.dispose()});player.position.copy(interiorState.outside);interiorState=null;document.getElementById("toast").textContent="Zpět na ulici";return}
  if(inCar){var heading=car.group.rotation.y;var sx=car.group.position.x+Math.cos(heading)*5.5,sz=car.group.position.z-Math.sin(heading)*5.5;if(collides(sx,sz,1.4)){sx=car.group.position.x-Math.cos(heading)*5.5;sz=car.group.position.z+Math.sin(heading)*5.5}player.position.set(sx,0,sz);player.visible=true;inCar=false;return}
  if(distXZ(player.position,car.group.position)<9){inCar=true;player.visible=false;document.getElementById("toast").textContent="Za volantem — vyraz!";return}
  var nearest=null,best=1e9;
  buildings.forEach(function(b,i){var ex=Math.max(Math.abs(player.position.x-b.x)-b.w/2,0),ez=Math.max(Math.abs(player.position.z-b.z)-b.d/2,0),gap=Math.hypot(ex,ez);if(gap<best){best=gap;nearest={building:b,index:i}}});
- if(nearest&&best<5){var b=nearest.building;interiorState={building:b,outside:player.position.clone(),room:null};b.mesh.visible=false;interiorState.room=makeInterior(b,nearest.index);player.position.set(b.x,0,b.z+b.d*.25);player.rotation.y=Math.PI;document.getElementById("toast").textContent="Interiér "+(nearest.index+1)+" — E: zpět na ulici"}
+ if(nearest&&best<5){var b=nearest.building;interiorState={building:b,outside:player.position.clone(),room:null};b.mesh.visible=false;interiorState.room=makeInterior(b,nearest.index);player.position.set(b.x,0,b.z+Math.min(12,Math.min(48,b.d*.65)*.25));player.rotation.y=Math.PI;document.getElementById("toast").textContent="Interiér "+(nearest.index+1)+" — E: zpět na ulici"}
 }
 function pause(){paused=!paused;overlay.hidden=!paused;document.getElementById("title").innerHTML=paused?"Krátká<br>pauza.":"Noc patří<br>ulicím.";document.getElementById("copy").textContent=paused?"Ulice počkají. Klikni pro pokračování.":"Palmy, neon a poslední jízda přes Vice Bay. Sebereš zásilky, uhneš hlídce a dostaneš se na výjezd?";playButton.textContent=paused?"Pokračovat":"Nastartovat hru"}
 function endGame(win){active=false;finished=win;arrested=!win;overlay.hidden=false;document.getElementById("title").innerHTML=win?"Čistý<br>únik.":"Konec<br>jízdy.";document.getElementById("copy").textContent=win?"Zásilky doručeny. Vice Bay dnes zůstává za tebou.":"Hlídka tě dostihla. Zkus znovu vyrazit ulicemi.";playButton.textContent="Hrát znovu"}
