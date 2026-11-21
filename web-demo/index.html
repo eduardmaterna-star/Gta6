@@ -86,7 +86,7 @@ var canvas=document.getElementById("game"),ctx=canvas.getContext("2d"),overlay=d
 var lootEl=document.getElementById("loot"),scoreEl=document.getElementById("score"),wantedEl=document.getElementById("wanted"),statusEl=document.getElementById("status");
 var W=2800,H=2000,roadXs=[150,550,950,1350,1750,2150,2550],roadYs=[150,550,950,1350,1750],roads=[],buildings=[],keys=Object.create(null);
 var pickups=[{x:550,y:150,taken:false},{x:2150,y:550,taken:false},{x:550,y:1750,taken:false},{x:2550,y:1350,taken:false}];
-var exit={x:150,y:950,r:52},player={x:1350,y:950,a:0},car={x:1460,y:950,a:0,v:0};
+var exit={x:150,y:950,r:52},player={x:1350,y:950,a:0},car={x:1425,y:950,a:0,v:0};
 var cops=[{x:150,y:1750,a:0},{x:2550,y:150,a:0}],playing=false,paused=false,won=false,arrested=false,score=0,loot=0,wanted=0,last=0,eWasDown=false,pWasDown=false,arrestTime=0,elapsed=0,dpr=1,viewW=0,viewH=0;
 for(var i=0;i<roadXs.length;i++)roads.push({x:roadXs[i],vertical:true});
 for(var j=0;j<roadYs.length;j++)roads.push({y:roadYs[j],vertical:false});
@@ -101,7 +101,7 @@ window.addEventListener("keydown",function(e){var k=e.key.toLowerCase();keys[k]=
 window.addEventListener("keyup",function(e){keys[e.key.toLowerCase()]=false});
 window.addEventListener("blur",function(){keys=Object.create(null)});
 document.getElementById("start").addEventListener("click",function(){if(won||arrested)reset();playing=true;paused=false;overlay.hidden=true;statusEl.textContent="Vezmi auto, nebo vyraz pěšky."});
-function reset(){player={x:1350,y:950,a:0};car={x:1460,y:950,a:0,v:0};pickups.forEach(function(p){p.taken=false});cops=[{x:150,y:1750,a:0},{x:2550,y:150,a:0}];score=0;loot=0;wanted=0;elapsed=0;arrestTime=0;won=false;arrested=false;updateHud()}
+function reset(){player={x:1350,y:950,a:0};car={x:1425,y:950,a:0,v:0};pickups.forEach(function(p){p.taken=false});cops=[{x:150,y:1750,a:0},{x:2550,y:150,a:0}];score=0;loot=0;wanted=0;elapsed=0;arrestTime=0;won=false;arrested=false;updateHud()}
 function updateHud(){lootEl.textContent=loot+" / "+pickups.length;scoreEl.textContent=score.toLocaleString("cs-CZ")+" Kč";wantedEl.textContent=wanted?("★".repeat(wanted)+"☆".repeat(4-wanted)):"—"}
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 function hitRect(x,y,r,b){var nx=Math.max(b.x,Math.min(x,b.x+b.w)),ny=Math.max(b.y,Math.min(y,b.y+b.h));return (x-nx)*(x-nx)+(y-ny)*(y-ny)<r*r}
