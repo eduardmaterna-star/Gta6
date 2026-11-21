@@ -181,7 +181,7 @@ function makeInterior(building,index){
  // Ceiling light and a warm point light make the room readable.
  var lamp=new THREE.Mesh(new THREE.SphereGeometry(.38,10,8),new THREE.MeshStandardMaterial({color:0xffedc0,emissive:0xffbd70,emissiveIntensity:2}));lamp.position.set(0,wallH-.65,0);g.add(lamp);
  var light=new THREE.PointLight(0xffc985,34,42,2);light.position.set(0,wallH-1,0);g.add(light);
- scene.add(g);return g;
+ g.position.set(building.x,0,building.z);scene.add(g);return g;
 }
 function interact(){
  if(interiorState){interiorState.building.mesh.visible=true;scene.remove(interiorState.room);player.position.copy(interiorState.outside);interiorState=null;document.getElementById("toast").textContent="Zpět na ulici";return}
