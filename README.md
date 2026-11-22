@@ -1,52 +1,50 @@
-# GTA6 — originální open-world projekt
+# NEXXT GEN — originální open-world Crime Simulator
 
-Samostatná originální open-world akční hra inspirovaná kriminálním žánrem, zasazená do herní interpretace Prahy. Nejde o oficiální produkt Rockstar Games ani o kopii jejich chráněné mapy, postav nebo příběhu.
+NEXXT GEN je ambiciózní originální open-world hra zasazená do fiktivního města inspirovaného Prahou. GTA 5 a GTA 6 jsou pouze žánrovou inspirací; město, postavy, příběh, hudba, značky a herní obsah budou vlastní.
 
-## Potvrzený směr
-- Windows PC, Unreal Engine 5.8.
-- Realistická, ale optimalizovaná grafika.
-- Dlouhodobý cíl světa: 20 × 20 km.
-- Tři hlavní postavy a kriminální příběh gangů.
-- Důležité budovy budou mít interiéry.
-- Rozsáhlá silniční a veřejná doprava.
-- Nejprve singleplayer; multiplayer se posoudí v pozdější fázi.
-- Výkonový cíl 1080p / 120 FPS je požadavek k ověření, ne naměřený výsledek.
+## Hlavní vize
 
-## Distribuce
-Vybraná varianta je **jeden kompletní offline instalátor pro Windows x64**. Výsledný EXE bude obsahovat instalační aplikaci i celý zabalený herní payload. Instalace nebude potřebovat internet ani samostatný ZIP.
+- Fotorealistická grafika s maximální prioritou na prostředí, osvětlení, animace a příběh.
+- Cílový svět 20 × 20 km: jedno velké město, předměstí, venkov a průmyslové oblasti.
+- Tři hlavní postavy a příběh s vězeňskou částí, útěkem a následnými důsledky.
+- Cíl přibližně 40 hodin příběhu, 100 hlavních a 200 vedlejších misí.
+- Dlouhodobé cíle: až 500 NPC v městské simulaci a přibližně 200 vozidel.
+- Dynamické počasí, denní/noční cyklus, roční období, interiéry a změny světa.
+- Nejdříve singleplayer; kooperace a dedikované servery až v pozdější etapě.
+- Bez sociální sítě a příspěvků NPC.
 
-- Zdroj instalátoru: Installer/GTA6.iss (Inno Setup)
-- Build skript: Scripts/Build-OfflineInstaller.ps1
-- Architektura a stav: Docs/OFFLINE_INSTALLER_SINGLE_FILE.md
+## Hlavní zadání
 
-Velikost 50 MB není realistická pro kompletní hru. Finální instalátor obsahuje komprimované herní soubory. Jeden Windows EXE má praktický limit necelé 4 GiB; pokud komprimovaný herní balík tento limit překročí, bude nutné zmenšit balík nebo změnit distribuční formát. Přesnou velikost zjistíme až po vytvoření skutečného Unreal Windows buildu.
+**[Docs/NEXXT_GEN_GAME_DESIGN.md](Docs/NEXXT_GEN_GAME_DESIGN.md)** je hlavní produktové a herní zadání. Obsahuje všechny části dotazníku, technické cíle, pracovní rozhodnutí, vývojové etapy a otevřené body.
 
-## Aktuální stav hry
-**Milestone 002 — první runtime greybox čtvrť.** Obsahuje C++ third-person prototyp a procedurálně poskládanou blokovou čtvrť. Nejde zatím o detailní Prahu ani o finální mapu.
+## Technologie a grafika
 
-**Milestone 004 — projektová základna.** Připraveny jsou projektové konfigurační soubory, statické CI kontroly a dokumentace pro lokální Windows build. Runtime greybox má nastavitelné `GenerationSeed`, který reprodukovatelně mění počty a rozměry budov, a omezené parametry `DistrictCellCount` / `DistrictCellSize` pro bezpečné testování různě velkých prototypových čtvrtí. Přidaný je první C++ základ civilního NPC s AIControllerem a časovačem řízeným pohybem po dosažitelných bodech NavMeshe; pro jeho testování je stále nutné vytvořit NavMeshBoundsVolume v editoru. Skutečný World Partition .umap musí být vytvořen v Unreal Editoru.
+- Aktuální zdrojový projekt: Unreal Engine 5.8.
+- Cílové technologie: Lumen, Nanite, Virtual Shadow Maps, TSR a volitelný ray tracing.
+- DLSS, FSR a XeSS budou volitelné podle kompatibility GPU, platformy a ověřené verze pluginu.
+- Grafický vertical slice bude nejdříve vytvořen a změřen v jedné kvalitně zpracované čtvrti.
 
-## Požadavky pro lokální build hry
-- Unreal Engine 5.8.x.
-- Visual Studio 2022 s C++ workloady a Windows SDK.
+Grafické požadavky a akceptační testy jsou popsány v [Docs/QA_ACCEPTANCE_MATRIX.md](Docs/QA_ACCEPTANCE_MATRIX.md). Samotný záměr ještě neznamená, že renderer nebo výsledná kvalita prošly testem.
 
-Podrobnosti: Docs/WINDOWS_BUILD_AND_TEST.md.
+## Platformy a distribuce
 
-## Architektura a QA
-- `Docs/TECHNICAL_ARCHITECTURE.md` — hranice herních systémů, datové toky a implementační pořadí.
-- `Docs/QA_ACCEPTANCE_MATRIX.md` — požadované testy a důkazy pro dokončení funkcí.
+- První vydávací cíl: Windows 10/11 x64.
+- Pozdější cíle: samostatné Linux a macOS buildy s vlastní testovací maticí.
+- Hráč nebude muset instalovat Unreal Engine ani Unreal Editor.
+- Windows verze má mít offline instalátor bez nutnosti stahovat hru během instalace.
+- Orientační velikost kolem 5 GB není pevný limit. Kvalita obsahu má přednost; skutečná velikost se změří po zabalení hry.
 
-## Ověření
-GitHub Actions ověřuje kompilaci Inno Setup instalačního skriptu s testovacím souborem. To nenahrazuje kompilaci Unreal Engine ani test instalace skutečné hry.
+## Aktuální technický stav
 
-V tomto prostředí nebyl dostupný Unreal Editor, MSVC ani Windows .NET SDK. Kompilace, spuštění, herní testy, instalace a velikost výsledného instalátoru proto nejsou potvrzené.
+Repozitář obsahuje počáteční UE 5.8 C++ základ, runtime greybox čtvrť, první prototyp civilní AI, prototyp vozidla a základ ukládání/načítání. Obsahuje také samostatné browser demo. Tyto části nejsou finální hrou.
 
+Fotorealistické assety, kompletní mapa 20 × 20 km, celý příběh, kompletní katalog vozidel, plná simulace 500 NPC, multiplatformní buildy a multiplayer zatím nejsou dokončené. UE C++ build, editorový runtime a výkon zabalené hry musí být ověřeny na Windows build stroji.
 
-## Save/load development
+## Vývoj a QA
 
-See [save/load setup and verification requirements](Docs/SAVE_LOAD_SETUP.md) for the initial versioned persistence slice and its remaining UE 5.8 runtime tests.
+- [Docs/GAME_DESIGN_DECISIONS.md](Docs/GAME_DESIGN_DECISIONS.md) — stručný přehled potvrzeného směru.
+- [Docs/TECHNICAL_ARCHITECTURE.md](Docs/TECHNICAL_ARCHITECTURE.md) — hranice systémů a technická architektura.
+- [Docs/QA_ACCEPTANCE_MATRIX.md](Docs/QA_ACCEPTANCE_MATRIX.md) — povinné testy a důkazy.
+- [Docs/WINDOWS_BUILD_AND_TEST.md](Docs/WINDOWS_BUILD_AND_TEST.md) — lokální sestavení a testování.
 
-
-## Vehicle prototype
-
-See [vehicle prototype setup and limitations](Docs/VEHICLE_PROTOTYPE_SETUP.md) for the first physics-driven vehicle source slice and its pending UE 5.8 tests.
+Žádná funkce, FPS hodnota ani cílová platforma nebude označena za hotovou bez odpovídajícího testu.

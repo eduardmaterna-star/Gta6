@@ -1,40 +1,52 @@
-# GTA6 — kompletní offline instalátor pro Windows
+# NEXXT GEN — Windows offline instalátor
 
-Distribuční formát je jeden Windows x64 soubor EXE, který obsahuje instalační program i všechny soubory zabalené hry. Instalace nevyžaduje internet ani další ZIP/manifest soubory.
+## Cíl
 
-## Zvolená technologie
+Výsledný hráčský produkt se jmenuje **NEXXT GEN**. Hráč si stáhne a nainstaluje zabalenou hru; nemusí instalovat Unreal Engine ani Unreal Editor. Instalace Windows verze má fungovat bez připojení k internetu.
 
-Používáme **Inno Setup 6.5.2 nebo novější**. Jeho vlastní instalační formát je vhodnější než připojování dat za .NET single-file EXE: .NET single-file host očekává vlastní bundle metadata na konci souboru, takže prosté připojení dat za hotový EXE není bezpečný formát.
+Přítomnost běžných systémových ovladačů nebo runtime komponent neznamená, že by hráč musel instalovat vývojový engine.
 
-Inno Setup od verze 6.5.2 umí vytvořit jeden Setup.exe o velikosti téměř 4 GiB. To je zároveň praktický limit Windows PE souboru. Pokud komprimovaná hra limit překročí, požadavek na jediný EXE nebude možné splnit bez změny distribuce nebo zmenšení herního balíku. Zdroj: https://jrsoftware.org/files/is6-whatsnew.htm.
+## Aktuální jednosouborová varianta
+
+Používáme Inno Setup 6.5.2 nebo novější. Instalátor:
+- zobrazuje produkt NEXXT GEN;
+- instaluje do %LOCALAPPDATA%\Programs\NexxtGen bez administrátorských práv;
+- obsahuje všechny soubory Windows buildu uvnitř offline EXE;
+- vytváří nabídku Start a volitelnou ikonu na ploše;
+- vypisuje SHA-256 výsledného souboru.
+
+Interní zdrojový soubor Installer/GTA6.iss a název spustitelného souboru OpenWorldNextGen.exe zatím zůstávají kvůli návaznosti současného repozitáře. Hráčská značka a název instalátoru jsou NEXXT GEN.
+
+## Velikost
+
+Cíl instalované velikosti kolem 5 GB je orientační, nikoli tvrdý limit kvality. Jedno Windows EXE má praktickou hranici necelé 4 GiB. Komprimovaný instalátor se může pod tuto hranici vejít i pro větší instalovanou hru, ale musí se to změřit na skutečném buildu.
+
+Pokud komprimovaný obsah překročí limit jednoho EXE, distribuce se změní na více souborů offline média. Hra se nebude zmenšovat ani zbavovat grafických assetů jen kvůli zachování jednoho souboru.
 
 ## Build
 
-1. Zabalit Unreal Engine 5.8 projekt pro Windows x64.
-2. Umístit celý výstup do Build/Windows.
-3. Ověřit, že hlavní spustitelný soubor je OpenWorldNextGen.exe v kořeni této složky.
+1. Zabalit Unreal Engine projekt pro Windows x64.
+2. Umístit kompletní výstup do Build/Windows.
+3. Ověřit, že kořen adresáře obsahuje OpenWorldNextGen.exe.
 4. Nainstalovat Inno Setup 6.5.2+ na Windows build stroj.
 5. Spustit z kořene repozitáře:
 
-    .\\Scripts\\Build-OfflineInstaller.ps1 -Version 0.1.0
+    .\Scripts\Build-OfflineInstaller.ps1 -Version 0.1.0
 
-Výstup: Build/Installer/GTA6-Setup-0.1.0-x64.exe.
+Výstup: Build/Installer/NexxtGen-Setup-0.1.0-x64.exe.
 
-Inno Setup zabalí celý obsah Build/Windows přímo do jediného offline instalátoru. Build skript zkontroluje, že výsledný EXE nepřekročil hranici 4 GiB, a vypíše SHA-256.
+## CI a ověření
 
-## Vlastnosti instalace
+GitHub Actions staticky kontroluje zdroj instalátoru a může zkompilovat testovací balíček. To neprokazuje funkčnost kompletní zabalené UE hry.
 
-- Veškeré herní soubory jsou uvnitř instalátoru.
-- Žádné stahování, online manifest ani externí archiv.
-- Instalace do %LOCALAPPDATA%\\Programs\\GTA6 bez administrátorských práv.
-- Odinstalace přes standardní Windows seznam aplikací.
-- Volitelná ikona na ploše a spuštění hry po instalaci.
-- Inno Setup kontroluje integritu instalovaných dat pomocí svého instalačního formátu.
-
-## CI
-
-GitHub Actions instaluje Inno Setup a kompiluje instalační skript s malým testovacím souborem místo skutečné hry. Tím ověřuje syntaxi skriptu a vznik instalačního EXE, nikoli funkčnost skutečného Unreal buildu.
+Před vydáním musí proběhnout:
+- vytvoření skutečného UE 5.8 Windows buildu;
+- kompilace instalátoru se všemi herními soubory;
+- instalace na čistém Windows bez internetu;
+- spuštění hry, kontrola aktualizace a odinstalace;
+- kontrola volného místa, SHA-256 a podepsání release artefaktů;
+- měření výsledné velikosti staženého i nainstalovaného balíku.
 
 ## Aktuální omezení
 
-V repozitáři zatím není skutečný kompletní Windows build hry. Proto zatím neexistuje finální instalační EXE, nelze změřit jeho velikost a nebyl proveden test instalace na čistém Windows bez internetu. Reálný herní balík musí být vytvořen v Unreal Engine na Windows.
+V repozitáři zatím není kompletní zabalený Windows build hry. Finální instalátor, jeho velikost a instalace bez internetu proto nejsou ověřené.

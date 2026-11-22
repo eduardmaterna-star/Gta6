@@ -9,19 +9,20 @@
 #endif
 
 [Setup]
+; Keep the existing AppId stable so future updates use the same installation identity.
 AppId={{B8E6A52D-73CF-4D12-AF66-5C5E0E31C6A2}
-AppName=GTA6
+AppName=NEXXT GEN
 AppVersion={#AppVersion}
-AppPublisher=GTA6 Project
-DefaultDirName={localappdata}\Programs\GTA6
-DefaultGroupName=GTA6
+AppPublisher=Nexxt Gen Project
+DefaultDirName={localappdata}\Programs\NexxtGen
+DefaultGroupName=NEXXT GEN
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayIcon={app}\OpenWorldNextGen.exe
 OutputDir="{#OutputDir}"
-OutputBaseFilename=GTA6-Setup-{#AppVersion}-x64
+OutputBaseFilename=NexxtGen-Setup-{#AppVersion}-x64
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -31,8 +32,8 @@ CloseApplications=yes
 RestartApplications=no
 VersionInfoVersion={#AppVersion}.0
 VersionInfoProductVersion={#AppVersion}.0
-VersionInfoDescription=GTA6 Offline Installer
-VersionInfoProductName=GTA6
+VersionInfoDescription=Nexxt Gen Offline Installer
+VersionInfoProductName=NEXXT GEN
 
 [Languages]
 Name: "czech"; MessagesFile: "compiler:Languages\Czech.isl"
@@ -44,8 +45,8 @@ Name: "desktopicon"; Description: "Vytvořit ikonu na ploše"; GroupDescription:
 Source: "{#GameDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\GTA6"; Filename: "{app}\OpenWorldNextGen.exe"
-Name: "{autodesktop}\GTA6"; Filename: "{app}\OpenWorldNextGen.exe"; Tasks: desktopicon
+Name: "{autoprograms}\NEXXT GEN"; Filename: "{app}\OpenWorldNextGen.exe"
+Name: "{autodesktop}\NEXXT GEN"; Filename: "{app}\OpenWorldNextGen.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\OpenWorldNextGen.exe"; Description: "Spustit GTA6"; Flags: postinstall nowait skipifsilent unchecked
+Filename: "{app}\OpenWorldNextGen.exe"; Description: "Spustit NEXXT GEN"; Flags: postinstall nowait skipifsilent unchecked

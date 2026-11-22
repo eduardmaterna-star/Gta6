@@ -8,6 +8,7 @@ $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $gameDir = Join-Path $root "Build\Windows"
 $outputDir = Join-Path $root "Build\Installer"
+# The source filename is a legacy repository path; the installed product is NEXXT GEN.
 $scriptPath = Join-Path $root "Installer\GTA6.iss"
 $exeName = "OpenWorldNextGen.exe"
 
@@ -40,7 +41,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Inno Setup compilation failed with exit code $LASTEXITCODE."
 }
 
-$installerPath = Join-Path $outputDir "GTA6-Setup-$Version-x64.exe"
+$installerPath = Join-Path $outputDir "NexxtGen-Setup-$Version-x64.exe"
 if (-not (Test-Path -LiteralPath $installerPath -PathType Leaf)) {
     throw "Výsledný instalátor nebyl vytvořen: $installerPath"
 }
@@ -49,7 +50,7 @@ $installer = Get-Item -LiteralPath $installerPath
 # Windows PE executables cannot exceed the 4 GiB file-size boundary.
 if ($installer.Length -ge 4GB) {
     Remove-Item -LiteralPath $installerPath -Force
-    throw "Komprimovaný instalátor dosáhl limitu jednoho Windows EXE (téměř 4 GiB). Pro tuto velikost už nelze zachovat jeden EXE soubor."
+    throw "Komprimovaný instalátor dosáhl limitu jednoho Windows EXE (téměř 4 GiB). Použijeme vícedílné offline médium; herní obsah ani grafiku nebudeme zmenšovat jen kvůli jednomu EXE."
 }
 
 $hash = Get-FileHash -LiteralPath $installerPath -Algorithm SHA256
@@ -57,5 +58,5 @@ $hash = Get-FileHash -LiteralPath $installerPath -Algorithm SHA256
     Installer = $installerPath
     InstallerSizeGiB = [math]::Round($installer.Length / 1GB, 3)
     InstallerSHA256 = $hash.Hash
-    Distribution = "Single self-contained Inno Setup EXE; no network or sidecar files"
+    Distribution = "Single self-contained NEXXT GEN offline Inno Setup EXE; no network or sidecar files"
 } | Format-List
