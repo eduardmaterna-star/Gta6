@@ -1,6 +1,6 @@
 # District Run — 3D browser test build
 
-A playable 3D city-driving prototype made with Three.js. Runs in a current desktop browser; Unreal Engine is not required. Original neon coastal-city style, with procedurally furnished room interiors.
+A playable 3D city-driving prototype made with Three.js. Runs in a current desktop browser; Unreal Engine is not required. The original neon coastal city now has moving street traffic, a more detailed player character and car, and procedurally furnished room interiors.
 
 ## Play
 
@@ -18,7 +18,7 @@ Open `index.html` in a current desktop browser. Internet is needed to load the p
 - **Mouse wheel**: zoom
 - **R**: recover the car while driving
 
-Walk close to a building entrance and press **E** to enter its furnished interior. Press **E** again to return to the street. Rooms use different palettes and furniture arrangements.
+Walk close to a building entrance and press **E** to enter its furnished interior. Press **E** again to return to the street.
 
 Collect four packages and reach the green exit. Police pursue you after pickups.
 
