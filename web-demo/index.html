@@ -226,7 +226,7 @@ function endGame(win){active=false;finished=win;arrested=!win;overlay.hidden=fal
 function updateCar(dt,vehicle,playerVehicle){
  var g=vehicle.group;
  if(playerVehicle){
-  var throttle=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),steer=(keys.KeyA||keys.ArrowLeft?1:0)-(keys.KeyD||keys.ArrowRight?1:0);
+  var throttle=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),steer=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
   vehicle.velocity+=throttle*46*dt;var steeringAssist=(keys.KeyW||keys.ArrowUp)?1.65:1,drifting=!!keys.ShiftLeft||!!keys.ShiftRight;
   vehicle.velocity*=Math.pow(keys.Space ? 0.91 : (drifting?0.994:0.986),dt*60);vehicle.velocity=Math.max(-12,Math.min(68,vehicle.velocity));
   if(Math.abs(vehicle.velocity)>1)g.rotation.y+=steer*(.12+Math.min(Math.abs(vehicle.velocity)/68,1)*.48)*steeringAssist*(drifting?1.25:1)*dt;
