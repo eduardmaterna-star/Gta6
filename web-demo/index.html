@@ -152,6 +152,22 @@ function makeCar(color,isPolice){
  scene.add(g);return{group:g,wheels:wheelList,velocity:0,police:!!isPolice};
 }
 var car=makeCar(0xffbf66,false);car.group.position.set(2,0,-7);car.group.rotation.y=Math.PI;
+var smokeCount=120,smokeGeometry=new THREE.BufferGeometry(),smokePositions=new Float32Array(smokeCount*3),smokeAlpha=new Float32Array(smokeCount),smokeSizes=new Float32Array(smokeCount),smokeLife=new Float32Array(smokeCount),smokeMaxLife=new Float32Array(smokeCount),smokeVX=new Float32Array(smokeCount),smokeVY=new Float32Array(smokeCount),smokeVZ=new Float32Array(smokeCount),smokeCursor=0,smokeClock=0;
+smokeGeometry.setAttribute("position",new THREE.BufferAttribute(smokePositions,3));smokeGeometry.setAttribute("aAlpha",new THREE.BufferAttribute(smokeAlpha,1));smokeGeometry.setAttribute("aSize",new THREE.BufferAttribute(smokeSizes,1));smokeGeometry.boundingSphere=new THREE.Sphere(new THREE.Vector3(),3000);
+var smokeMaterial=new THREE.ShaderMaterial({transparent:true,depthWrite:false,vertexShader:"attribute float aAlpha;attribute float aSize;varying float vAlpha;void main(){vAlpha=aAlpha;vec4 mv=modelViewMatrix*vec4(position,1.0);gl_Position=projectionMatrix*mv;gl_PointSize=aSize*(180.0/max(1.0,-mv.z));}",fragmentShader:"varying float vAlpha;void main(){float r=length(gl_PointCoord-vec2(.5));float soft=1.0-smoothstep(.12,.5,r);gl_FragColor=vec4(.67,.70,.73,soft*vAlpha);}"});
+var smokePoints=new THREE.Points(smokeGeometry,smokeMaterial);scene.add(smokePoints);
+function emitDrift(dt,vehicle){
+ if(Math.abs(vehicle.velocity)<10)return;smokeClock+=dt*28;
+ while(smokeClock>=1){smokeClock-=1;for(var side=-1;side<=1;side+=2){var i=smokeCursor++%smokeCount,g=vehicle.group,yaw=g.rotation.y,life=1.05+Math.random()*.55,lx=side*2.05,lz=-3.8;
+ smokeLife[i]=smokeMaxLife[i]=life;smokePositions[i*3]=g.position.x+lx*Math.cos(yaw)-lz*Math.sin(yaw)+(Math.random()-.5)*.8;smokePositions[i*3+1]=.65;smokePositions[i*3+2]=g.position.z-lx*Math.sin(yaw)+lz*Math.cos(yaw)+(Math.random()-.5)*.8;
+ smokeVX[i]=-Math.sin(yaw)*(1.5+Math.random()*1.5)+(Math.random()-.5)*1.4;smokeVY[i]=.7+Math.random()*1.1;smokeVZ[i]=-Math.cos(yaw)*(1.5+Math.random()*1.5)+(Math.random()-.5)*1.4;
+ smokeSizes[i]=1.5;smokeAlpha[i]=.3}}
+}
+function updateSmoke(dt){
+ for(var i=0;i<smokeCount;i++){if(smokeLife[i]<=0){smokeAlpha[i]=0;continue}smokeLife[i]-=dt;smokePositions[i*3]+=smokeVX[i]*dt;smokePositions[i*3+1]+=smokeVY[i]*dt;smokePositions[i*3+2]+=smokeVZ[i]*dt;var age=1-smokeLife[i]/smokeMaxLife[i];smokeSizes[i]=1.5+age*3.8;smokeAlpha[i]=Math.min(.3,smokeLife[i]*.65)}
+ smokeGeometry.attributes.position.needsUpdate=true;smokeGeometry.attributes.aAlpha.needsUpdate=true;smokeGeometry.attributes.aSize.needsUpdate=true;
+}
+
 var player=new THREE.Group(),skin=new THREE.MeshStandardMaterial({color:0xc78b70,roughness:.8}),shirt=new THREE.MeshStandardMaterial({color:0xe7c55d,roughness:.8}),pants=new THREE.MeshStandardMaterial({color:0x263249,roughness:.9}),shoe=new THREE.MeshStandardMaterial({color:0x101419,roughness:.8});
 box(player,0,2.12,0,1.18,1.35,.66,shirt,true,false);
 var head=new THREE.Mesh(new THREE.SphereGeometry(.39,20,16),skin);head.position.set(0,3.12,0);head.castShadow=true;player.add(head);
@@ -229,8 +245,8 @@ function updateCar(dt,vehicle,playerVehicle){
   var throttle=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),steer=(keys.KeyA||keys.ArrowLeft?1:0)-(keys.KeyD||keys.ArrowRight?1:0);
   vehicle.velocity+=throttle*46*dt;var steeringAssist=(keys.KeyW||keys.ArrowUp)?1.65:1,drifting=!!keys.ShiftLeft||!!keys.ShiftRight;
   vehicle.velocity*=Math.pow(keys.Space ? 0.91 : (drifting?0.994:0.986),dt*60);vehicle.velocity=Math.max(-12,Math.min(68,vehicle.velocity));
-  if(Math.abs(vehicle.velocity)>1)g.rotation.y+=steer*(.12+Math.min(Math.abs(vehicle.velocity)/68,1)*.48)*steeringAssist*(drifting?1.25:1)*dt;
-  vehicle.drift=THREE.MathUtils.lerp(vehicle.drift||0,drifting&&steer?-steer*Math.min(Math.abs(vehicle.velocity)/48,1)*.5:0,1-Math.pow(.08,dt));
+  if(Math.abs(vehicle.velocity)>1)g.rotation.y+=steer*(.12+Math.min(Math.abs(vehicle.velocity)/68,1)*.48)*steeringAssist*(drifting?1.16:1)*dt;
+  vehicle.drift=THREE.MathUtils.lerp(vehicle.drift||0,drifting&&steer&&Math.abs(vehicle.velocity)>10?-steer*Math.min(Math.abs(vehicle.velocity)/58,1)*.32:0,1-Math.exp(-dt*5));if(drifting&&steer)emitDrift(dt,vehicle);
   var moveYaw=g.rotation.y+(vehicle.drift||0),nx=g.position.x+Math.sin(moveYaw)*vehicle.velocity*dt,nz=g.position.z+Math.cos(moveYaw)*vehicle.velocity*dt;
   if(collides(nx,nz,3.5))vehicle.velocity*=-.2;else{g.position.x=nx;g.position.z=nz}
  }else{
@@ -272,7 +288,7 @@ function cameraUpdate(dt){
  camera.position.lerp(desiredCam,1-Math.pow(.001,dt));lookAt.set(t.x,t.y+(inCar?1.7:2.1),t.z);camera.lookAt(lookAt);
 }
 var last=performance.now();
-function frame(now){var dt=Math.min((now-last)/1000,.04);last=now;update(dt);cameraUpdate(dt);renderer.render(scene,camera);requestAnimationFrame(frame)}
+function frame(now){var dt=Math.min((now-last)/1000,.04);last=now;update(dt);updateSmoke(dt);cameraUpdate(dt);renderer.render(scene,camera);requestAnimationFrame(frame)}
 function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6))}
 window.addEventListener("resize",resize);
 document.getElementById("toast").textContent="E — nastoupit do blízkého auta";
