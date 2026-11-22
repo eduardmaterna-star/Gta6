@@ -162,6 +162,8 @@ V dotazníku jsou dvě protichůdné volby: v ekonomice je nákup nemovitostí o
 
 **Pracovní výklad pro návrh:** hráč nekupuje pozemky ani podniky na volném realitním trhu. Domovy a byty získává odemykáním v příběhu nebo postupem ve hře; jejich vybavení lze upravovat. Garáže a úložné prostory pro vozidla lze získávat samostatně. Počet vlastních míst se nemá uměle omezit na několik málo slotů, ale musí být technicky omezený validací uložených dat a výkonu.
 
+Nákup nábytku není plánován. Úpravy bytů se proto budou řešit výběrem stylů a odemykatelnými variantami vybavení, nikoli nákupem jednotlivých kusů z obchodu. Funkční vybavení domácnosti zůstává požadavkem.
+
 Tento výklad zachovává „nekupovat nemovitosti“ a současně umožňuje vlastnit více domovů a garáží. Pokud se později rozhodne jinak, upraví se ekonomický design.
 
 ## 12. Počasí, čas a roční období
@@ -250,6 +252,8 @@ Hráč nemá instalovat Unreal Engine ani Unreal Editor. Dostane **zabalenou sam
 | macOS | Samostatný macOS build a testy na Apple Silicon; grafické funkce a kvalita se mohou lišit od Windows. |
 
 Unreal Engine umí připravovat balíčky pro Windows, macOS a Linux. Jednotlivé platformy ale vyžadují samostatné buildy, SDK, pluginy a testování. „Všechny Linuxy“ se proto převádí na podporovanou a zveřejněnou testovací matici.
+
+Grafické funkce nebudou na všech platformách totožné. UE 5.8 uvádí pro macOS softwarový Lumen na Apple Silicon M1+, zatímco Nanite a Virtual Shadow Maps mají na Apple Silicon M2+ beta podporu; Windows DX12 cesta proto nebude automaticky kopírována na Mac. DLSS vyžaduje kompatibilní NVIDIA GPU. AMD FSR a Intel XeSS mají vlastní hardwarové, RHI a platformní požadavky; aktuální Intel XeSS UE plugin dokumentuje pouze Windows x64 s DirectX 12. Výběr upscaleru musí být podmíněný dostupností a hra musí mít obecnou TSR cestu.
 
 ### Grafické karty
 
