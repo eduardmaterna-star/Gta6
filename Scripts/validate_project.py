@@ -34,6 +34,26 @@ def main() -> int:
     require("/Script/OpenWorldNextGen.OWGameMode" in engine_config,
             "Default game mode path is missing from DefaultEngine.ini.")
 
+    renderer_settings = (
+        "r.GenerateMeshDistanceFields=True",
+        "r.DynamicGlobalIlluminationMethod=1",
+        "r.ReflectionMethod=1",
+        "r.Shadow.Virtual.Enable=1",
+        "r.Nanite.ProjectEnabled=True",
+        "r.AntiAliasingMethod=4",
+    )
+    for setting in renderer_settings:
+        require(setting in engine_config, f"Missing high-fidelity renderer setting: {setting}")
+    require("DefaultGraphicsRHI=DefaultGraphicsRHI_DX12" in engine_config,
+            "Windows renderer must default to DirectX 12.")
+    require("+D3D12TargetedShaderFormats=PCD3D_SM6" in engine_config,
+            "Windows build must target Shader Model 6 for Lumen/Nanite/VSM.")
+    graphics_profile = ROOT / "Docs/HIGH_FIDELITY_GRAPHICS_PROFILE.md"
+    require(graphics_profile.is_file(), "High-fidelity graphics profile documentation is missing.")
+    graphics_doc = graphics_profile.read_text(encoding="utf-8")
+    for feature in ("Lumen", "Virtual Shadow Maps", "Temporal Super Resolution", "Nanite"):
+        require(feature in graphics_doc, f"Graphics profile is missing feature guidance: {feature}")
+
     required_sources = (
         "Source/OpenWorldNextGen/OpenWorldNextGen.cpp",
         "Source/OpenWorldNextGen/Game/OWGameMode.h",

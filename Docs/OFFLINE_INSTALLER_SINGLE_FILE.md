@@ -1,12 +1,14 @@
-# GTA6 — kompletní offline instalátor pro Windows
+# GTA6 — kompletní offline instalace pro Windows
 
-Distribuční formát je jeden Windows x64 soubor EXE, který obsahuje instalační program i všechny soubory zabalené hry. Instalace nevyžaduje internet ani další ZIP/manifest soubory.
+Požadavek je offline instalace pro Windows x64, která nevyžaduje internet. Instalovaný herní obsah může mít přibližně 5 GB nebo více; 5 GB není pevný limit pro grafiku ani obsah.
 
-## Zvolená technologie
+## Aktuální jednosouborová varianta
+
+Distribuční formát aktuálně používá jeden Windows x64 soubor EXE, který obsahuje instalační program i všechny soubory zabalené hry. Instalace nevyžaduje internet ani další ZIP/manifest soubory.
 
 Používáme **Inno Setup 6.5.2 nebo novější**. Jeho vlastní instalační formát je vhodnější než připojování dat za .NET single-file EXE: .NET single-file host očekává vlastní bundle metadata na konci souboru, takže prosté připojení dat za hotový EXE není bezpečný formát.
 
-Inno Setup od verze 6.5.2 umí vytvořit jeden Setup.exe o velikosti téměř 4 GiB. To je zároveň praktický limit Windows PE souboru. Pokud komprimovaná hra limit překročí, požadavek na jediný EXE nebude možné splnit bez změny distribuce nebo zmenšení herního balíku. Zdroj: https://jrsoftware.org/files/is6-whatsnew.htm.
+Inno Setup od verze 6.5.2 umí vytvořit jeden Setup.exe o velikosti téměř 4 GiB. To je praktický limit této jednosouborové varianty. Instalovaná hra o velikosti 5 GB se může po kompresi do limitu vejít, ale nelze to předpokládat bez skutečného buildu. Pokud komprimovaný balík limit překročí, **nesnižovat kvalitu ani neodstraňovat herní obsah kvůli jednomu souboru**; změnit distribuci na vícesouborové offline médium (EXE + datové části), které zůstane plně offline.
 
 ## Build
 
@@ -24,8 +26,8 @@ Inno Setup zabalí celý obsah Build/Windows přímo do jediného offline instal
 
 ## Vlastnosti instalace
 
-- Veškeré herní soubory jsou uvnitř instalátoru.
-- Žádné stahování, online manifest ani externí archiv.
+- Veškeré herní soubory jsou uvnitř offline instalačního média.
+- Žádné stahování, online manifest ani externí archiv nejsou pro instalaci potřeba.
 - Instalace do %LOCALAPPDATA%\\Programs\\GTA6 bez administrátorských práv.
 - Odinstalace přes standardní Windows seznam aplikací.
 - Volitelná ikona na ploše a spuštění hry po instalaci.
@@ -37,4 +39,4 @@ GitHub Actions instaluje Inno Setup a kompiluje instalační skript s malým tes
 
 ## Aktuální omezení
 
-V repozitáři zatím není skutečný kompletní Windows build hry. Proto zatím neexistuje finální instalační EXE, nelze změřit jeho velikost a nebyl proveden test instalace na čistém Windows bez internetu. Reálný herní balík musí být vytvořen v Unreal Engine na Windows.
+V repozitáři zatím není skutečný kompletní Windows build hry. Proto zatím neexistuje finální instalační EXE, nelze změřit jeho velikost a nebyl proveden test instalace na čistém Windows bez internetu. Reálný herní balík musí být vytvořen v Unreal Engine na Windows. Jednosouborová hranice 4 GiB se bude řešit jen tehdy, až ji překročí skutečný komprimovaný build.
