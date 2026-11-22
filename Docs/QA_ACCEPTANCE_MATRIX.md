@@ -16,6 +16,16 @@ This matrix is the minimum evidence required before marking a feature complete. 
 
 ## Feature acceptance
 
+### Graphics quality (renderer baseline configured; visual acceptance pending)
+- Windows uses DirectX 12 and the project targets Shader Model 6 for the desktop feature path.
+- Lumen global illumination and reflections are active in a representative UE 5.8 map.
+- Virtual Shadow Maps and TSR are active and visually checked for artefacts.
+- At least one suitable imported static mesh has Nanite enabled and is inspected in Nanite visualization modes.
+- The scene contains a controlled exposure/sky/lighting setup and authored PBR materials; the current cube greybox does not satisfy art acceptance.
+- Texture streaming, mipmaps and World Partition/HLOD behavior are checked while moving across district boundaries.
+- Performance capture at 1080p records GPU/CPU frame time, average FPS, 1% lows, system RAM and VRAM for a street, dense area, interior and district transition.
+- High/Epic presets are accepted only after visual comparison and profiling on the RTX 5050 8 GB target; no 120 FPS claim without measured evidence.
+
 ### Player movement and interaction
 - Movement is camera-relative and remains stable at different frame rates.
 - Jump starts and stops correctly; movement is blocked by world collision.
@@ -58,13 +68,14 @@ This matrix is the minimum evidence required before marking a feature complete. 
 - Cross-system events cannot create duplicate pursuits, missions or faction changes.
 - No feature is marked complete based only on an empty class, placeholder mesh or documentation.
 
-## Current verification status (2026-11-12)
+## Current verification status (2026-11-22)
 
-- Repository static validation: current commit result must be checked in GitHub Actions; checks are source-level only.
+- Repository static validation: check the workflow result for the exact commit; checks are source-level only.
 - Installer source validation: source configuration checks only; no real game executable is packaged or launched.
-- Unreal C++ compilation (including the new persistence subsystem): not run in this environment.
+- Unreal C++ compilation: not run in this environment.
 - Unreal Editor/runtime tests: not run.
 - Packaged Windows game and offline installation: not verified.
-- Performance measurements: not available.
+- Graphics quality/performance captures: not available.
+- 1080p / 120 FPS: target only, not measured.
 
 Never replace these statuses with a green badge unless the corresponding test actually ran on the current commit.
