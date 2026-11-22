@@ -139,6 +139,11 @@ function makeCar(color,isPolice){
  var g=new THREE.Group(),bodyMat=new THREE.MeshStandardMaterial({color:color,metalness:.56,roughness:.27}),tireMat=new THREE.MeshStandardMaterial({color:0x0a0d11,roughness:1});
  box(g,0,1.05,0,5.4,1.2,9,bodyMat,true,true);box(g,0,1.92,-.25,4.1,1.05,4.6,glass,true,false);
  box(g,0,.64,4.3,4.2,.36,.16,chrome,false,false);box(g,0,.64,-4.3,4.2,.36,.16,chrome,false,false);
+ // Front grille, mirrors, side trim, and tail lamps give the vehicle a clearer road-car silhouette.
+ box(g,0,.92,4.59,2.2,.42,.16,new THREE.MeshStandardMaterial({color:0x15191e,metalness:.35,roughness:.6}),false,false);
+ box(g,0,.67,4.64,4.6,.32,.32,chrome,false,false);
+ box(g,0,.9,-4.56,4.5,.38,.28,chrome,false,false);
+ [-1,1].forEach(function(s){box(g,s*2.28,1.92,1.05,.42,.22,.68,bodyMat,true,false);box(g,s*2.02,1.05,-4.56,.65,.36,.12,new THREE.MeshStandardMaterial({color:0xff4355,emissive:0x9c1525,emissiveIntensity:.65}),false,false);box(g,s*2.76,1.85,.8,.52,.28,.62,chrome,false,false)});
  var wheelList=[];
  [-1,1].forEach(function(s){[-2.9,2.9].forEach(function(z){var wh=new THREE.Mesh(new THREE.CylinderGeometry(.78,.78,.5,16),tireMat);wh.rotation.z=Math.PI/2;wh.position.set(s*2.55,.72,z);wh.castShadow=true;g.add(wh);wheelList.push(wh)})});
  var headMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffefc3,emissiveIntensity:3});
@@ -149,7 +154,12 @@ function makeCar(color,isPolice){
 var car=makeCar(0xffbf66,false);car.group.position.set(2,0,-7);car.group.rotation.y=Math.PI;
 var player=new THREE.Group(),skin=new THREE.MeshStandardMaterial({color:0xc78b70,roughness:.8}),shirt=new THREE.MeshStandardMaterial({color:0xe7c55d,roughness:.8}),pants=new THREE.MeshStandardMaterial({color:0x263249,roughness:.9}),shoe=new THREE.MeshStandardMaterial({color:0x101419,roughness:.8});
 box(player,0,2.12,0,1.18,1.35,.66,shirt,true,false);
-var head=new THREE.Mesh(new THREE.SphereGeometry(.39,14,10),skin);head.position.y=3.12;head.castShadow=true;player.add(head);
+var head=new THREE.Mesh(new THREE.SphereGeometry(.39,20,16),skin);head.position.set(0,3.12,0);head.castShadow=true;player.add(head);
+var hairMat=new THREE.MeshStandardMaterial({color:0x30211c,roughness:.92}),eyeWhite=new THREE.MeshStandardMaterial({color:0xf2e7d7,roughness:.45}),eyeDark=new THREE.MeshStandardMaterial({color:0x201912,roughness:.35}),mouthMat=new THREE.MeshStandardMaterial({color:0x703c35,roughness:.7});
+var hair=new THREE.Mesh(new THREE.SphereGeometry(.405,16,10,0,Math.PI*2,0,Math.PI*.52),hairMat);hair.position.set(0,3.24,0);player.add(hair);
+[-1,1].forEach(function(s){var eye=new THREE.Mesh(new THREE.SphereGeometry(.075,10,8),eyeWhite);eye.position.set(s*.14,3.15,.342);player.add(eye);var pupil=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),eyeDark);pupil.position.set(s*.14,3.15,.405);player.add(pupil);var ear=new THREE.Mesh(new THREE.SphereGeometry(.09,8,6),skin);ear.position.set(s*.37,3.1,0);player.add(ear)});
+var nose=new THREE.Mesh(new THREE.SphereGeometry(.075,8,6),skin);nose.scale.set(.8,1,.8);nose.position.set(0,3.04,.39);player.add(nose);
+box(player,0,2.94,.365,.16,.035,.03,mouthMat,false,false);
 box(player,-.7,2.15,0,.36,1.15,.38,shirt,true,false);box(player,.7,2.15,0,.36,1.15,.38,shirt,true,false);
 var legs=[];[-.31,.31].forEach(function(x){var leg=box(player,x,.78,0,.43,1.45,.48,pants,true,false);legs.push(leg);box(player,x,.1,.12,.46,.24,.75,shoe,true,false)});
 player.position.set(0,0,0);scene.add(player);
@@ -158,6 +168,12 @@ var pickupMat=new THREE.MeshStandardMaterial({color:0xd2ff73,emissive:0x7ef04b,e
 pickupData.forEach(function(p,i){var grp=new THREE.Group();var cube=new THREE.Mesh(new THREE.BoxGeometry(2.8,2.5,2.8),new THREE.MeshStandardMaterial({color:i%2?0xd58d63:0xcca66c,roughness:.85}));cube.castShadow=true;grp.add(cube);var band=new THREE.Mesh(new THREE.BoxGeometry(2.9,.28,2.9),pickupMat);band.position.y=.25;grp.add(band);var ring=new THREE.Mesh(new THREE.TorusGeometry(3.5,.09,8,32),pickupMat);ring.rotation.x=Math.PI/2;ring.position.y=.3;grp.add(ring);grp.position.set(p.x,2,p.z);scene.add(grp);pickups.push({group:grp,x:p.x,z:p.z,taken:false})});
 var exit={x:-900,z:0,r:14},exitRing=new THREE.Mesh(new THREE.TorusGeometry(13,.42,10,56),pickupMat);exitRing.rotation.x=Math.PI/2;exitRing.position.set(exit.x,.25,exit.z);scene.add(exitRing);
 var cops=[makeCar(0x182a3d,true),makeCar(0x182a3d,true)];cops[0].group.position.set(-830,0,620);cops[1].group.position.set(820,0,-620);
+var traffic=[];
+var trafficColors=[0x3e8190,0x8c4e54,0xb4a05f,0x566876,0x825f97,0xc7c8c5,0x386454,0xa75f37];
+var routes=[];
+[-600,0,600].forEach(function(x){routes.push({axis:"z",fixed:x-15,dir:1,yaw:0},{axis:"z",fixed:x+15,dir:-1,yaw:Math.PI})});
+[-600,0,600].forEach(function(z){routes.push({axis:"x",fixed:z+15,dir:1,yaw:Math.PI/2},{axis:"x",fixed:z-15,dir:-1,yaw:-Math.PI/2})});
+routes.forEach(function(route,ri){for(var n=0;n<2;n++){var v=makeCar(trafficColors[(ri*2+n)%trafficColors.length],false);v.traffic=true;v.axis=route.axis;v.fixed=route.fixed;v.dir=route.dir;v.velocity=15+(ri+n)%5*2;v.group.rotation.y=route.yaw;if(route.axis==="z")v.group.position.set(route.fixed,0,-550+n*850);else v.group.position.set(-550+n*850,0,route.fixed);traffic.push(v)}});
 var buildings=buildingRects,active=false,paused=false,finished=false,arrested=false,inCar=false,loot=0,cash=0,wanted=0,arrestT=0,clock=0;
 var keys=Object.create(null),cameraYaw=0,cameraPitch=.26,cameraDistance=16,dragging=false,lastX=0,lastY=0,prevE=false,prevP=false,prevR=false;
 window.addEventListener("keydown",function(e){keys[e.code]=true;if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code)>=0)e.preventDefault()});
@@ -238,6 +254,7 @@ function update(dt){
   else{legs[0].rotation.x*=.75;legs[1].rotation.x*=.75}
  }
  if(interiorState){cameraUpdate(dt);return}
+ traffic.forEach(function(v){if(v.axis==="z"){v.group.position.z+=v.dir*v.velocity*dt;if(v.group.position.z>980)v.group.position.z=-980;else if(v.group.position.z< -980)v.group.position.z=980}else{v.group.position.x+=v.dir*v.velocity*dt;if(v.group.position.x>980)v.group.position.x=-980;else if(v.group.position.x< -980)v.group.position.x=980}v.wheels.forEach(function(w){w.rotation.x+=v.velocity*dt*.3})});
  var t=target();
  for(var i=0;i<pickups.length;i++){var item=pickups[i];if(!item.taken&&distXZ(t,item)<9){item.taken=true;item.group.visible=false;loot++;cash+=500;wanted=Math.min(4,wanted+1);hud();document.getElementById("toast").textContent="Zásilka zajištěna — policie je na cestě."}}
  for(var c=0;c<Math.min(wanted+1,cops.length);c++){updateCar(dt,cops[c],false);if(distXZ(target(),cops[c].group.position)<7&&(!inCar||Math.abs(car.velocity)<15))arrestT+=dt;else arrestT=Math.max(0,arrestT-dt*.6)}
