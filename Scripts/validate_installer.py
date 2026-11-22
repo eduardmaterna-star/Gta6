@@ -24,7 +24,8 @@ def main() -> int:
     required_installer_settings = (
         ('AppName=NEXXT GEN', "Installer product name must be NEXXT GEN."),
         ('AppPublisher=Nexxt Gen Project', "Installer publisher label must match the current product name."),
-        ('DefaultDirName={localappdata}\\Programs\\NexxtGen', "Installer must use the Nexxt Gen per-user install directory."),
+        ('DefaultDirName={localappdata}', "Installer must use a per-user install directory."),
+        ('NexxtGen', "Installer must use the Nexxt Gen install directory name."),
         ('OutputBaseFilename=NexxtGen-Setup-{#AppVersion}-x64', "Installer output filename must use the Nexxt Gen product name."),
         ('PrivilegesRequired=lowest', "Installer must not require administrator privileges."),
         ('ArchitecturesAllowed=x64', "Installer must be restricted to Windows x64."),
