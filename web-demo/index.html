@@ -229,7 +229,7 @@ function updateCar(dt,vehicle,playerVehicle){
   var throttle=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),steer=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
   vehicle.velocity+=throttle*34*dt;var drifting=!!keys.ShiftLeft||!!keys.ShiftRight;
   vehicle.velocity*=Math.pow(keys.Space ? 0.91 : (drifting?0.994:0.986),dt*60);vehicle.velocity=Math.max(-12,Math.min(48,vehicle.velocity));
-  g.rotation.y+=steer*(.8+Math.min(Math.abs(vehicle.velocity)/25,1))*(drifting?1.45:1)*dt*(vehicle.velocity<0?-1:1);
+  g.rotation.y+=steer*(.8+Math.min(Math.abs(vehicle.velocity)/25,1))*(drifting?1.45:1)*dt;
   vehicle.drift=THREE.MathUtils.lerp(vehicle.drift||0,drifting&&steer?-steer*Math.min(Math.abs(vehicle.velocity)/48,1)*.5:0,1-Math.pow(.08,dt));
   var moveYaw=g.rotation.y+(vehicle.drift||0),nx=g.position.x+Math.sin(moveYaw)*vehicle.velocity*dt,nz=g.position.z+Math.cos(moveYaw)*vehicle.velocity*dt;
   if(collides(nx,nz,3.5))vehicle.velocity*=-.2;else{g.position.x=nx;g.position.z=nz}
