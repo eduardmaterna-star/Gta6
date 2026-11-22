@@ -53,4 +53,5 @@ private:
     FTimerHandle SpawnTimerHandle;
     TArray<TWeakObjectPtr<AOWCivilianCharacter>> SpawnedCivilians;
     bool bWarnedMissingNavigation = false;
+    bool bWarnedInvalidSpawnerOrigin = false;
 };

@@ -35,7 +35,9 @@ This matrix is the minimum evidence required before marking a feature complete. 
 - It selects reachable points, moves, stops, and retries when navigation is unavailable.
 - Timers are cleared and movement stops when the actor is destroyed or the level unloads.
 - A population test verifies the configured cap and records CPU/memory/path request rates.
-- The spawner uses bounded location attempts, validates a path from its origin, staggers spawns, and cleans up all owned civilians on EndPlay.
+- The spawner projects its actor origin onto NavMesh before sampling candidates and validating connecting paths; an invalid origin enters a delayed retry state.
+- The spawner uses bounded location attempts, staggers spawns, periodically rechecks a reached population cap, and replaces civilians that are removed externally.
+- The spawner cleans up all owned civilians on EndPlay.
 
 ### Save/load (source slice implemented; engine/runtime acceptance pending)
 - Schema version, map identifier, player transform, selected-character ID and UTC timestamp are serialized.
