@@ -265,6 +265,7 @@ function update(dt){
  car.group.position.y=Math.sin(clock*12)*.018;
 }
 function cameraUpdate(dt){
+ if(inCar&&!dragging){var followYaw=car.group.rotation.y-Math.PI,followDiff=Math.atan2(Math.sin(followYaw-cameraYaw),Math.cos(followYaw-cameraYaw));cameraYaw+=followDiff*(1-Math.pow(.015,dt))}
  var t=target(),yaw=cameraYaw;
  var dist=inCar?cameraDistance+3:cameraDistance;
  desiredCam.set(t.x+Math.sin(yaw)*dist, t.y+(inCar?6:4)+dist*Math.sin(cameraPitch), t.z+Math.cos(yaw)*dist);
