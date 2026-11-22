@@ -2,7 +2,7 @@
   "FileVersion": 3,
   "EngineAssociation": "5.8",
   "Category": "Games",
-  "Description": "Original open-world crime game set in a fictionalized, Prague-inspired city.",
+  "Description": "NEXXT GEN: an original photorealistic open-world Crime Simulator set in a fictional city inspired by Prague.",
   "Modules": [
     {
       "Name": "OpenWorldNextGen",
