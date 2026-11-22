@@ -22,7 +22,10 @@ def main() -> int:
     build = BUILD_SCRIPT.read_text(encoding="utf-8")
 
     required_installer_settings = (
-        ('AppName=GTA6', "Installer product name is missing."),
+        ('AppName=NEXXT GEN', "Installer product name must be NEXXT GEN."),
+        ('AppPublisher=Nexxt Gen Project', "Installer publisher label must match the current product name."),
+        ('DefaultDirName={localappdata}\\Programs\\NexxtGen', "Installer must use the Nexxt Gen per-user install directory."),
+        ('OutputBaseFilename=NexxtGen-Setup-{#AppVersion}-x64', "Installer output filename must use the Nexxt Gen product name."),
         ('PrivilegesRequired=lowest', "Installer must not require administrator privileges."),
         ('ArchitecturesAllowed=x64', "Installer must be restricted to Windows x64."),
         ('OutputDir="{#OutputDir}"', "Installer output directory must use the supplied macro and preserve spaces."),
@@ -41,6 +44,7 @@ def main() -> int:
         ('OpenWorldNextGen.exe', "Build script must require the actual game executable."),
         ('ISCC.exe', "Build script must invoke the Inno Setup compiler."),
         ('$LASTEXITCODE -ne 0', "Build script must fail when Inno Setup compilation fails."),
+        ('NexxtGen-Setup-$Version-x64.exe', "Build script must use the Nexxt Gen output filename."),
         ('Get-FileHash', "Build script must calculate the final installer SHA-256."),
         ('4GB', "Build script must reject installer files at the single-EXE size boundary."),
     )
@@ -49,7 +53,7 @@ def main() -> int:
 
     check("Launcher/GTA6.Installer" not in installer + build,
           "Selected offline installer must not depend on the retired .NET bootstrapper.")
-    print("Inno Setup offline installer source validation passed.")
+    print("NEXXT GEN Inno Setup offline installer source validation passed.")
     print("Note: this is static validation; installer compilation and real offline installation were not run.")
     return 0
 
